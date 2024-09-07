@@ -1,11 +1,12 @@
 import './App.css';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { useEffect, useMemo, useState } from "react";
-import { blue, orange } from "@mui/material/colors";
-import { BottomNavigation, BottomNavigationAction, Container, CssBaseline, darkScrollbar, Paper } from "@mui/material";
+import {createTheme, ThemeProvider} from '@mui/material/styles';
+import {useEffect, useMemo, useState} from "react";
+import {blue, orange} from "@mui/material/colors";
+import {BottomNavigation, BottomNavigationAction, Container, CssBaseline, darkScrollbar, Paper} from "@mui/material";
 import Home from "./pages/Home";
 import Data from "./pages/Data";
 import Setting from "./pages/Setting";
+import {RecoilRoot} from "recoil";
 
 function App() {
     const [darkMode, setDarkMode] = useState(false);
@@ -57,32 +58,36 @@ function App() {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline/>
-            <Container className="app-root" maxWidth="md"  style={{marginTop: '2rem', marginBottom: '5rem'}}>
-                {/* 모든 페이지 컴포넌트를 렌더링하되, 현재 페이지만 표시 */}
-                <div style={{ display: currentPage === 0 ? 'block' : 'none' }}><Home /></div>
-                <div style={{ display: currentPage === 1 ? 'block' : 'none' }}><Data /></div>
-                <div style={{ display: currentPage === 2 ? 'block' : 'none' }}><Setting darkMode={darkMode} setDarkMode={setDarkMode} /></div>
-            <BottomNav value={currentPage} setValue={setCurrentPage} />
-            </Container>
+            <RecoilRoot>
+                <Container className="app-root" maxWidth="xl" style={{marginTop: '2rem', marginBottom: '5rem'}}>
+                    {/* 모든 페이지 컴포넌트를 렌더링하되, 현재 페이지만 표시 */}
+                    <div style={{display: currentPage === 0 ? 'block' : 'none'}}><Home/></div>
+                    <div style={{display: currentPage === 1 ? 'block' : 'none'}}><Data/></div>
+                    <div style={{display: currentPage === 2 ? 'block' : 'none'}}><Setting darkMode={darkMode}
+                                                                                          setDarkMode={setDarkMode}/>
+                    </div>
+                    <BottomNav value={currentPage} setValue={setCurrentPage}/>
+                </Container>
+            </RecoilRoot>
         </ThemeProvider>
     );
 }
 
-function BottomNav({ value, setValue }) {
+function BottomNav({value, setValue}) {
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
 
     return (
-        <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
+        <Paper sx={{position: 'fixed', bottom: 0, left: 0, right: 0}} elevation={3}>
             <BottomNavigation
                 showLabels
                 value={value}
                 onChange={handleChange}
             >
-                <BottomNavigationAction label="크롤링" />
-                <BottomNavigationAction label="데이터" />
-                <BottomNavigationAction label="앱 설정" />
+                <BottomNavigationAction label="크롤링"/>
+                <BottomNavigationAction label="데이터"/>
+                <BottomNavigationAction label="앱 설정"/>
             </BottomNavigation>
         </Paper>
     );

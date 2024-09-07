@@ -18,17 +18,27 @@ function createWindow() {
             contextIsolation: false,
             enableRemoteModule: true,
             devTools: isDev,
+            webSecurity: false,
         },
     });
 
-    // ***중요***
     mainWindow.loadURL(
         isDev
             ? "http://localhost:3000"
             : `file://${path.join(__dirname, "../build/index.html")}`
     );
 
-    if (isDev) mainWindow.webContents.openDevTools({ mode: "detach" });
+    if (isDev) {
+        mainWindow.webContents.openDevTools();
+        // 개발자 도구 단축키 등록
+        mainWindow.webContents.on('before-input-event', (event, input) => {
+            if (input.meta && input.alt && input.key.toLowerCase() === 'i') {  // macOS
+                mainWindow.webContents.toggleDevTools();
+                event.preventDefault();
+            }
+        });
+
+    }
 
     mainWindow.setResizable(true);
     mainWindow.on("closed", () => {

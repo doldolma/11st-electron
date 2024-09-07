@@ -1,5 +1,16 @@
 import {useEffect, useState} from "react";
-import {Button, Divider, FormControl, IconButton, Input, InputLabel, List, ListItem, Stack} from "@mui/material";
+import {
+    Button,
+    Divider,
+    FormControl,
+    IconButton,
+    Input,
+    InputLabel,
+    List,
+    ListItem,
+    MenuItem, Select,
+    Stack
+} from "@mui/material";
 import Item from "../styles/Item";
 import Grid from "@mui/material/Grid2";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -7,6 +18,9 @@ import fixedButton from "../styles/fixedButton";
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 import getCategoryProducts from "../util/eleven";
+import {useRecoilState} from "recoil";
+import product from "../atoms/product";
+import defaultCategory from '../util/category';
 
 
 const list = {
@@ -14,12 +28,6 @@ const list = {
     bgcolor: 'background.paper',
     topMargin: '10px'
 };
-
-const defaultCategory = {
-    no: null
-}
-
-const completedList = [];
 
 export default function Home() {
 
@@ -38,6 +46,11 @@ export default function Home() {
     // 크롤링 진행 중 여부
     const [loading, setLoading] = useState(false);
 
+    // 스캔 완료된 목록
+    const [completedList, setCompletedList] = useRecoilState(product);
+
+    console.log("keys ", Object.keys(completedList))
+
     useEffect(() => {
         if (loading) {
             setAddFlag(false);
@@ -52,10 +65,24 @@ export default function Home() {
 
     const crawlProduct = async () => {
         for (const category of categories) {
-            if (completedList.includes(category.no)) continue;
+            if (Object.keys(completedList).includes(String(category.no))) continue;
 
-            const result = getCategoryProducts(category)
-            completedList.push(category.no);
+            getCategoryProducts(category)
+                .then(result => {
+                    if (result) {
+                        setCompletedList(c => ({
+                            ...c,
+                            [category.no]: {
+                                category: category,
+                                date: Date.now(),
+                                products: result
+                            }
+                        }));
+                    }
+                }).catch(e => {
+                alert('상품 정보를 수집하는 중 오류가 발생했습니다.');
+                console.error(e)
+            });
         }
 
         alert("데이터 수집이 완료되었습니다.");
@@ -67,7 +94,7 @@ export default function Home() {
                 11번가 슈팅배송 랭킹에 있는 상품을 스캔합니다
             </h1>
             <h3 style={{textAlign: 'center'}}>
-                스캔할 카테고리 번호를 추가하고 시작 버튼을 눌러주세요
+                스캔할 카테고리를 선택하고 재생 버튼을 누르면 슈팅배송 목록을 스캔합니다.
             </h3>
 
 
@@ -80,8 +107,11 @@ export default function Home() {
                 <List sx={list} component="nav">
                     <ListItem sx={{width: '100%'}}>
                         <Grid container spacing={2} sx={{width: '100%'}}>
-                            <Grid size={8}>
-                                <Item><h3>카테고리 번호</h3></Item>
+                            <Grid size={2}>
+                                번호
+                            </Grid>
+                            <Grid size={6}>
+                                <Item><h3>카테고리</h3></Item>
                             </Grid>
                             <Grid size={2}>
                                 <Item><h3>상태</h3></Item>
@@ -96,14 +126,17 @@ export default function Home() {
                         return (
                             <ListItem sx={{width: '100%'}} key={category.no}>
                                 <Grid container spacing={2} sx={{width: '100%'}}>
-                                    <Grid size={8}>
-                                        <Item>{category.no}</Item>
+                                    <Grid size={2}>
+                                        {category.no}
+                                    </Grid>
+                                    <Grid size={6}>
+                                        <Item>{category.name}</Item>
                                     </Grid>
                                     <Grid size={2}>
                                         <Item>
                                             {
                                                 presentLoad === i ? '진행중' : (
-                                                    completedList.includes(category.no) ? '완료됨' : '대기중'
+                                                    Object.keys(completedList).includes(String(category.no)) ? '완료됨' : '대기중'
                                                 )
                                             }
                                         </Item>
@@ -124,24 +157,20 @@ export default function Home() {
                     {
                         addFlag ? <>
                             <FormControl variant="standard" sx={{m: 1, mt: 3, width: '25ch'}}>
-                                <InputLabel htmlFor="outlined-adornment-amount" shrink={true}>
-                                    카테고리 번호
-                                </InputLabel>
-                                <Input
-                                    id="standard-adornment-weight"
+                                <InputLabel id="demo-simple-select-standard-label">카테고리</InputLabel>
+                                <Select
+                                    label='카테고리'
                                     value={newCategory.no}
-                                    type="number"
-                                    onChange={e => setNewCategory({...newCategory, no: Number(e.target.value)})}
-                                />
+                                    onChange={(e) => setNewCategory(e.target.value)}
+                                >
+                                    {defaultCategory.map((c, i) => <MenuItem key={c.no} value={c}>{c.name}</MenuItem>)}
+                                </Select>
                             </FormControl>
                             <div>
                                 <Button variant="contained" onClick={() => {
                                     if (!newCategory.no) return;
 
-                                    console.log("newCategory", newCategory);
-                                    console.log("completedList", completedList);
-
-                                    if (completedList.includes(newCategory.no)) {
+                                    if (Object.keys(completedList).includes(newCategory.no)) {
                                         alert('이미 완료된 카테고리입니다');
                                         return;
                                     }
@@ -167,17 +196,18 @@ export default function Home() {
             </Stack>
             <div style={fixedButton}>
                 {
-                    loading ? <HourglassTopIcon style={{fontSize: '5rem'}}/> : <PlayArrowIcon style={{fontSize: '5rem'}} onClick={() => {
-                        if (loading) return;
+                    loading ? <HourglassTopIcon style={{fontSize: '5rem'}}/> :
+                        <PlayArrowIcon style={{fontSize: '5rem'}} onClick={() => {
+                            if (loading) return;
 
-                        if (!window.confirm('상품 정보를 수집할까요?')) {
-                            return;
-                        }
+                            if (!window.confirm('상품 정보를 수집할까요?')) {
+                                return;
+                            }
 
-                        setLoading(true);
+                            setLoading(true);
 
-                        crawlProduct().then(() => setLoading(false))
-                    }} />
+                            crawlProduct().then(() => setLoading(false))
+                        }}/>
                 }
             </div>
         </>

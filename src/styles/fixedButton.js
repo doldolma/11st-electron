@@ -1,7 +1,7 @@
 const fixedButton = {
     position: 'fixed',
     top: '80%',
-    left: '90%',
+    right: '20%',
     // transform: 'translate(-50%, -50%)',
     zIndex: 1,
     cursor: 'pointer',
