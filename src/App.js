@@ -85,7 +85,7 @@ function BottomNav({value, setValue}) {
                 value={value}
                 onChange={handleChange}
             >
-                <BottomNavigationAction label="크롤링"/>
+                <BottomNavigationAction label="11번가"/>
                 <BottomNavigationAction label="데이터"/>
                 <BottomNavigationAction label="앱 설정"/>
             </BottomNavigation>

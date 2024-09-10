@@ -87,8 +87,8 @@ app.on("window-all-closed", () => {
 
 function createAboutWindow() {
     dialog.showMessageBox(mainWindow, {
-        title: '11번가 상품 조회',
-        message: '11번가 슈팅배송 상품 조회',
+        title: '상품 조회',
+        message: '상품 조회 앱',
         // detail: `Version: ${app.getVersion()}\nElectron: ${process.versions.electron}\nChrome: ${process.versions.chrome}\nNode.js: ${process.versions.node}\nV8: ${process.versions.v8}`,
         detail: `Version: ${app.getVersion()}\n문의는 정고에게`,
         buttons: ['OK'],
