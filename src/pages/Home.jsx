@@ -1,16 +1,5 @@
 import {useEffect, useState} from "react";
-import {
-    Button,
-    Divider,
-    FormControl,
-    IconButton,
-    Input,
-    InputLabel,
-    List,
-    ListItem,
-    MenuItem, Select,
-    Stack
-} from "@mui/material";
+import {Autocomplete, Button, Divider, FormControl, IconButton, List, ListItem, Stack, TextField} from "@mui/material";
 import Item from "../styles/Item";
 import Grid from "@mui/material/Grid2";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -38,7 +27,7 @@ export default function Home() {
     const [addFlag, setAddFlag] = useState(false);
 
     // 신규 카테고리
-    const [newCategory, setNewCategory] = useState(defaultCategory);
+    const [newCategory, setNewCategory] = useState({});
 
     // 현재 작업 중인 카테고리
     const [presentLoad, setPresentLoad] = useState(-1);
@@ -49,7 +38,11 @@ export default function Home() {
     // 스캔 완료된 목록
     const [completedList, setCompletedList] = useRecoilState(product);
 
-    console.log("keys ", Object.keys(completedList))
+    // 카테고리 셀렉트 박스 목록
+    const defaultProps = {
+        options: defaultCategory,
+        getOptionLabel: (option) => option.name,
+    }
 
     useEffect(() => {
         if (loading) {
@@ -157,19 +150,32 @@ export default function Home() {
                     {
                         addFlag ? <>
                             <FormControl variant="standard" sx={{m: 1, mt: 3, width: '25ch'}}>
-                                <InputLabel id="demo-simple-select-standard-label">카테고리</InputLabel>
-                                <Select
-                                    label='카테고리'
-                                    value={newCategory.no}
-                                    onChange={(e) => setNewCategory(e.target.value)}
-                                >
-                                    {defaultCategory.map((c, i) => <MenuItem key={c.no} value={c}>{c.name}</MenuItem>)}
-                                </Select>
+                                <Autocomplete
+                                    {...defaultProps}
+                                    id="auto-select"
+                                    autoSelect
+                                    value={newCategory}
+                                    onChange={(e, newValue) => {
+                                        setNewCategory(newValue);
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField {...params} label="카테고리" variant="standard" />
+                                    )}
+                                />
+                                {/*<InputLabel id="demo-simple-select-standard-label">카테고리</InputLabel>*/}
+                                {/*<Select*/}
+                                {/*    label='카테고리'*/}
+                                {/*    value={newCategory.no}*/}
+                                {/*    onChange={(e) => setNewCategory(e.target.value)}*/}
+                                {/*>*/}
+                                {/*    {defaultCategory.map((c, i) => <MenuItem key={c.no} value={c}>{c.name}</MenuItem>)}*/}
+                                {/*</Select>*/}
                             </FormControl>
                             <div>
                                 <Button variant="contained" onClick={() => {
-                                    if (!newCategory.no) return;
-
+                                    if (!newCategory.no) {
+                                        return;
+                                    }
                                     if (Object.keys(completedList).includes(newCategory.no)) {
                                         alert('이미 완료된 카테고리입니다');
                                         return;
@@ -181,7 +187,11 @@ export default function Home() {
                                     }
 
                                     if (newCategory) setCategories([...categories, newCategory]);
-                                    setNewCategory({});
+
+
+                                    setNewCategory(null);
+
+
                                 }}>확인</Button>
                                 <Button variant="contained" style={{background: 'red'}}
                                         onClick={() => {
