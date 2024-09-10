@@ -73,7 +73,7 @@ function createWindow() {
 
 app.on("ready", () => {
     createWindow();
-    autoUpdater.checkForUpdatesAndNotify();
+    autoUpdater.checkForUpdates();
 });
 
 app.on("activate", () => {
@@ -83,20 +83,6 @@ app.on("activate", () => {
 app.on("window-all-closed", () => {
     if (process.platform !== "darwin") app.quit();
 });
-
-autoUpdater.on('checking-for-update', () => {
-    mainWindow.webContents.send('업데이트가 있는지 확인 중 ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ');
-});
-
-autoUpdater.on('update-available', () => {
-    mainWindow.webContents.send('새로운 버전이 릴리즈 되었습니다. 얼른 업데이트를 진행하십시오~!!!!!!!!!! 응 싫다해도 업데이트 할거야. 업데이트는 새로운 버그를 체집할 수 있는 좋은 기회죠');
-});
-
-autoUpdater.on('update-downloaded', () => {
-    mainWindow.webContents.send('업데이트 파일 다운로드가 완료됐음~~~~~!!!!... 네트워크 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠 냠냠 냠 냠 냠냠  앙 맛있쪙');
-});
-
-
 
 
 function createAboutWindow() {
