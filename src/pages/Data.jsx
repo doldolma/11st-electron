@@ -1,6 +1,5 @@
 import {useRecoilState} from "recoil";
 import product from "../atoms/product";
-import {useEffect} from "react";
 import {IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
 import saveExcel from "../util/product_excel";
 import DownloadIcon from '@mui/icons-material/Download';

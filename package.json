@@ -1,6 +1,6 @@
 {
   "name": "11st-electron",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "homepage": "./",
   "main": "public/electron.js",
@@ -69,9 +69,10 @@
       "artifactName": "${productName}-Setup-${version}.${ext}"
     },
     "win": {
-      "target": [
-        "nsis"
-      ]
+      "target": ["nsis", "zip"]
+    },
+    "mac": {
+      "target": ["dmg", "zip"]
     },
     "publish": {
       "provider": "github",

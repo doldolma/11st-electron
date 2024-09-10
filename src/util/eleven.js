@@ -4,17 +4,19 @@ const findType = 'PC_ProductGrid_Basic';
 
 export default async function getCategoryProducts(category) {
 
-    let data = (await axios.get("https://apis.11st.co.kr/pui/v2/page?pageId=PCSHOOTING_CATE&ctgr1No=" + category.no)).data;
+    let data = (await axios.get("https://apis.11st.co.kr/pui/v2/page?pageId=PCSHOOTING_CATE&" + category.url)).data;
 
     if (data.resultCode !== 200) {
         console.log("통신에러");
         return;
     }
 
-    return findShootingBest(data.data);
+    const isBigCategory = !category.url.includes('ctgr2No');
+
+    return findShootingBest(data.data, isBigCategory);
 }
 
-function findShootingBest(carrList) {
+function findShootingBest(carrList, isBigCategory) {
     let items = [];
     for (const carr of carrList) {
         // PC_ProductGrid_Basic 타입 찾기
@@ -33,8 +35,14 @@ function findShootingBest(carrList) {
 
             for (const listElement of list) {
                 let productsMeta = listElement.logData;
-                if (productsMeta.area === 'shooting_best') {
-                    items = [...items, ...listElement.items];
+                if (isBigCategory) {
+                    if (productsMeta.area === 'shooting_best') {
+                        items = [...items, ...listElement.items];
+                    }
+                } else {
+                    if (productsMeta.area === 'productlist') {
+                        items = [...items, ...listElement.items];
+                    }
                 }
             }
         }

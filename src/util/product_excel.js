@@ -9,7 +9,7 @@ export default async function saveExcel(product) {
     const wb = XLSX.utils.book_new();
 
     // JSON 데이터를 워크시트로 변환
-    const ws = XLSX.utils.json_to_sheet(preProcess(product.products));
+    const ws = XLSX.utils.json_to_sheet(preProcess(product));
 
     // 워크북에 워크시트 추가
     XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
@@ -25,20 +25,22 @@ export default async function saveExcel(product) {
 }
 
 
-function preProcess(product) {
-    return product.map(p => {
+function preProcess(productInfo) {
+    return productInfo.products.map((p, i) => {
         return {
-            rank: parseNumber(p.rankInfo?.rank),
-            review: parseNumber(p.review?.point),
-            reviewCount: parseNumber(p.review?.count),
-            prdNm: p.prdNm,
-            prdNo: p.prdNo,
-            sellPrice: parseNumber(p.sellPrice),
-            finalDscPrice: parseNumber(p.finalDscPrice),
-            discountRate: parseNumber(p.discountRate),
-            linkUrl: p.linkUrl,
-            imageUrl: 'https:' + p.imageUrl,
-            imageUrlAlt: p.imageUrlAlt,
+            '랭킹': p.rankInfo ? parseNumber(p.rankInfo?.rank) : i + 1,
+            '카테고리': productInfo.category.name,
+            '카테고리번호': productInfo.category.no,
+            '상품명': p.prdNm,
+            '상품번호': p.prdNo,
+            '판매가': parseNumber(p.sellPrice),
+            '최종판매가': parseNumber(p.finalDscPrice),
+            '할인율': parseNumber(p.discountRate),
+            '링크': p.linkUrl,
+            '이미지링크': 'https:' + p.imageUrl,
+            '이미지설명': p.imageUrlAlt,
+            '리뷰점수': parseNumber(p.review?.point),
+            '리뷰갯수': parseNumber(p.review?.count),
         }
     });
 }
