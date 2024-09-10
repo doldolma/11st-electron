@@ -73,7 +73,7 @@ function createWindow() {
 
 app.on("ready", () => {
     createWindow();
-    autoUpdater.checkForUpdates();
+    autoUpdater.checkForUpdatesAndNotify();
 });
 
 app.on("activate", () => {
