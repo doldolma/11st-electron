@@ -3,8 +3,6 @@ import { saveAs } from 'file-saver';
 
 export default async function saveExcel(product) {
 
-    console.log(product);
-
     // 워크북 생성
     const wb = XLSX.utils.book_new();
 

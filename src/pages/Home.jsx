@@ -18,6 +18,11 @@ const list = {
     topMargin: '10px'
 };
 
+const emptyCategory = {
+    no: '',
+    name: '',
+}
+
 export default function Home() {
 
     // 카테고리 목록
@@ -27,7 +32,7 @@ export default function Home() {
     const [addFlag, setAddFlag] = useState(false);
 
     // 신규 카테고리
-    const [newCategory, setNewCategory] = useState({});
+    const [newCategory, setNewCategory] = useState(emptyCategory);
 
     // 현재 작업 중인 카테고리
     const [presentLoad, setPresentLoad] = useState(-1);
@@ -47,7 +52,7 @@ export default function Home() {
     useEffect(() => {
         if (loading) {
             setAddFlag(false);
-            setNewCategory('');
+            setNewCategory(emptyCategory);
         }
     }, [loading]);
 
@@ -149,7 +154,7 @@ export default function Home() {
                 <div>
                     {
                         addFlag ? <>
-                            <FormControl variant="standard" sx={{m: 1, mt: 3, width: '25ch'}}>
+                            <FormControl variant="standard" sx={{width: '20ch'}}>
                                 <Autocomplete
                                     {...defaultProps}
                                     id="auto-select"
@@ -162,18 +167,10 @@ export default function Home() {
                                         <TextField {...params} label="카테고리" variant="standard" />
                                     )}
                                 />
-                                {/*<InputLabel id="demo-simple-select-standard-label">카테고리</InputLabel>*/}
-                                {/*<Select*/}
-                                {/*    label='카테고리'*/}
-                                {/*    value={newCategory.no}*/}
-                                {/*    onChange={(e) => setNewCategory(e.target.value)}*/}
-                                {/*>*/}
-                                {/*    {defaultCategory.map((c, i) => <MenuItem key={c.no} value={c}>{c.name}</MenuItem>)}*/}
-                                {/*</Select>*/}
                             </FormControl>
-                            <div>
+                            <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
                                 <Button variant="contained" onClick={() => {
-                                    if (!newCategory.no) {
+                                    if (!newCategory || !newCategory.no) {
                                         return;
                                     }
                                     if (Object.keys(completedList).includes(newCategory.no)) {
@@ -189,17 +186,17 @@ export default function Home() {
                                     if (newCategory) setCategories([...categories, newCategory]);
 
 
-                                    setNewCategory(null);
+                                    setNewCategory(emptyCategory);
 
 
                                 }}>확인</Button>
                                 <Button variant="contained" style={{background: 'red'}}
                                         onClick={() => {
-                                            setNewCategory(defaultCategory);
+                                            setNewCategory(emptyCategory);
                                             setAddFlag(false);
                                         }}>취소</Button>
                             </div>
-                        </> : (loading ? '' : <Button variant="contained" onClick={() => setAddFlag(true)}>카테고리 추가
+                        </> : (loading ? '' : <Button variant="contained" sx={{ mt: '1rem' }} onClick={() => setAddFlag(true)}>카테고리 추가
                         </Button>)
                     }
                 </div>

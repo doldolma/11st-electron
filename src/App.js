@@ -16,8 +16,12 @@ function App() {
             createTheme({
                 palette: {
                     mode: darkMode ? 'dark' : 'light',
-                    primary: orange,
-                    secondary: blue,
+                    ochre: {
+                        main: '#E3D026',
+                        light: '#E9DB5D',
+                        dark: '#A29415',
+                        contrastText: '#242105',
+                    }
                 },
                 components: {
                     MuiCssBaseline: {

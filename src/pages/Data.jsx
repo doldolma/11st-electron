@@ -1,6 +1,16 @@
 import {useRecoilState} from "recoil";
 import product from "../atoms/product";
-import {IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
+import {
+    Button,
+    IconButton,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow
+} from "@mui/material";
 import saveExcel from "../util/product_excel";
 import DownloadIcon from '@mui/icons-material/Download';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -65,6 +75,7 @@ export default function Data() {
                         }
                     </TableBody>
                 </Table>
+                <Button variant='outlined' style={{ float: 'right', marginRight: '3rem' }}>일괄다운</Button>
             </TableContainer>
         </>
     );
