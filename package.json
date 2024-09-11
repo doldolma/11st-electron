@@ -1,6 +1,6 @@
 {
   "name": "11st-electron",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "private": true,
   "homepage": "./",
   "main": "public/electron.js",
@@ -12,6 +12,7 @@
     "@mui/material": "^6.0.2",
     "@mui/styled-engine-sc": "^6.0.2",
     "axios": "^1.7.7",
+    "electron-log": "^5.2.0",
     "electron-updater": "^6.3.4",
     "file-saver": "^2.0.5",
     "react": "^18.3.1",
@@ -25,9 +26,9 @@
   "scripts": {
     "react-start": "react-scripts start",
     "react-build": "react-scripts build",
-    "start": "concurrently \"cross-env NODE_ENV=development BROWSER=none npm run react-start\" \"wait-on http://127.0.0.1:3000 && NODE_ENV=development electron . --enable-logging\"",
-    "build": "npm run react-build && NODE_ENV=production electron-builder",
-    "build:win": "npm run react-build && NODE_ENV=production electron-builder --win --x64",
+    "start": "concurrently \"cross-env NODE_ENV=development BROWSER=none npm run react-start\" \"wait-on http://127.0.0.1:3000 && cross-env NODE_ENV=development electron . --enable-logging\"",
+    "build": "npm run react-build && cross-env NODE_ENV=production electron-builder",
+    "build:win": "npm run react-build && cross-env NODE_ENV=production electron-builder --win --x64",
     "deploy": "npm run react-build &&  electron-builder --win --x64 --publish always"
   },
   "eslintConfig": {
@@ -70,10 +71,14 @@
       "artifactName": "${productName}-Setup-${version}.${ext}"
     },
     "win": {
-      "target": ["nsis", "zip"]
+      "target": "nsis",
+      "requestedExecutionLevel": "requireAdministrator"
     },
     "mac": {
-      "target": ["dmg", "zip"]
+      "target": [
+        "dmg",
+        "zip"
+      ]
     },
     "publish": {
       "provider": "github",

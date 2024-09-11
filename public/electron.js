@@ -2,10 +2,14 @@
 const { app, BrowserWindow, Menu, dialog } = require('electron');
 const path = require("path");
 const { autoUpdater } = require('electron-updater');
+const log = require('electron-log');
 
 const isDev = process.env.NODE_ENV === 'development';
 
 let mainWindow;
+
+autoUpdater.logger = log;
+autoUpdater.logger.transports.file.level = 'info';
 
 // 무제한 저장소 플래그 설정
 app.commandLine.appendSwitch('unlimited-storage');
