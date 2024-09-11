@@ -96,6 +96,7 @@ async function getOptions(productNo) {
 }
 
 async function getProductInfo(productNo) {
-
-    return (await axios.get("https://www.11st.co.kr/products/v1/pc/products/" + productNo + "/detail")).data;
+    return (await axios.get("https://www.11st.co.kr/products/v1/pc/products/" + productNo + "/detail")
+        .then(res => res.data)
+        .catch(err => null));
 }
