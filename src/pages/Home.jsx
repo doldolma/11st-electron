@@ -65,7 +65,7 @@ export default function Home() {
         for (const category of categories) {
             if (Object.keys(completedList).includes(String(category.no))) continue;
 
-            getCategoryProducts(category)
+            await getCategoryProducts(category)
                 .then(result => {
                     if (result) {
                         setCompletedList(c => ({

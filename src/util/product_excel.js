@@ -24,26 +24,29 @@ export default async function saveExcel(product) {
 
 
 function preProcess(productInfo) {
-    return productInfo.products.map((p, i) => {
+    return productInfo.products.map(p => {
+        if (!p) return {};
         return {
-            '랭킹': p.rankInfo ? parseNumber(p.rankInfo?.rank) : i + 1,
+            '랭킹': parseNumber(p.rank),
             '카테고리': productInfo.category.name,
             '카테고리번호': productInfo.category.no,
-            '상품명': p.prdNm,
-            '상품번호': p.prdNo,
-            '판매가': parseNumber(p.sellPrice),
-            '최종판매가': parseNumber(p.finalDscPrice),
-            '할인율': parseNumber(p.discountRate),
-            '링크': p.linkUrl,
-            '이미지링크': 'https:' + p.imageUrl,
-            '이미지설명': p.imageUrlAlt,
-            '리뷰점수': parseNumber(p.review?.point),
-            '리뷰갯수': parseNumber(p.review?.count),
+            '상품명': p.title?.name,
+            '상품번호': String(p.acmeInfo?.productNo),
+            '판매가': parseNumber(p.price?.sellPrice),
+            '최종판매가': parseNumber(p.price?.finalDscPrice),
+            '할인율': parseNumber(p.price?.discountRate),
+            '링크': p.acmeInfo?.productNo ? "https://www.11st.co.kr/products/pa/" + p.acmeInfo?.productNo : '',
+            '이미지링크': p.logData?.product_image_url,
+            '리뷰점수': parseNumber(p.title?.reviewSatisfy),
+            '리뷰갯수': parseNumber(p.title?.reviewCount),
         }
     });
 }
 
 function parseNumber(num) {
     if (!num) return;
-    return Number(num.replaceAll(',', ''));
+    if (typeof num === 'number') return num;
+    if (typeof num === 'string') {
+        return Number(num.replaceAll(',', ''));
+    }
 }
