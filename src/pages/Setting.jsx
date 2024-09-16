@@ -1,6 +1,5 @@
 import Grid from '@mui/material/Grid2';
-import {FormControlLabel, FormGroup, Paper, styled, Switch, useMediaQuery} from "@mui/material";
-import Item from "../styles/Item";
+import {FormControlLabel, FormGroup, styled, Switch, useMediaQuery} from "@mui/material";
 import {useEffect} from "react";
 
 

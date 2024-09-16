@@ -7,6 +7,8 @@ import Home from "./pages/Home";
 import Data from "./pages/Data";
 import Setting from "./pages/Setting";
 import {RecoilRoot} from "recoil";
+import Gmarket from "./component/gmarket/Gmarket";
+import Action from "./component/action/Action";
 
 function App() {
     const [darkMode, setDarkMode] = useState(false);
@@ -66,10 +68,10 @@ function App() {
                 <Container className="app-root" maxWidth="xl" style={{marginTop: '2rem', marginBottom: '5rem'}}>
                     {/* 모든 페이지 컴포넌트를 렌더링하되, 현재 페이지만 표시 */}
                     <div style={{display: currentPage === 0 ? 'block' : 'none'}}><Home/></div>
-                    <div style={{display: currentPage === 1 ? 'block' : 'none'}}><Data/></div>
-                    <div style={{display: currentPage === 2 ? 'block' : 'none'}}><Setting darkMode={darkMode}
-                                                                                          setDarkMode={setDarkMode}/>
-                    </div>
+                    <div style={{display: currentPage === 1 ? 'block' : 'none'}}><Gmarket /></div>
+                    <div style={{display: currentPage === 2 ? 'block' : 'none'}}><Action /></div>
+                    <div style={{display: currentPage === 3 ? 'block' : 'none'}}><Data/></div>
+                    <div style={{display: currentPage === 4 ? 'block' : 'none'}}><Setting darkMode={darkMode}  setDarkMode={setDarkMode}/></div>
                     <BottomNav value={currentPage} setValue={setCurrentPage}/>
                 </Container>
             </RecoilRoot>
@@ -89,7 +91,9 @@ function BottomNav({value, setValue}) {
                 value={value}
                 onChange={handleChange}
             >
-                <BottomNavigationAction label="11st"/>
+                <BottomNavigationAction label="11번가"/>
+                <BottomNavigationAction label="지마켓"/>
+                <BottomNavigationAction label="옥션"/>
                 <BottomNavigationAction label="데이터"/>
                 <BottomNavigationAction label="앱 설정"/>
             </BottomNavigation>

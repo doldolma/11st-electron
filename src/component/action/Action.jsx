@@ -1,22 +1,22 @@
 import {useEffect, useState} from "react";
-import {Autocomplete, Button, Divider, FormControl, IconButton, List, ListItem, Stack, TextField} from "@mui/material";
-import Item from "../styles/Item";
-import Grid from "@mui/material/Grid2";
-import DeleteIcon from "@mui/icons-material/Delete";
-import fixedButton from "../styles/fixedButton";
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import HourglassTopIcon from '@mui/icons-material/HourglassTop';
-import getCategoryProducts from "../util/eleven";
 import {useRecoilState} from "recoil";
-import product from "../atoms/product";
-import defaultCategory from '../util/category';
-
+import product from "../../atoms/product";
+import defaultCategory from "./util/smile_categories";
+import getCategoryProducts from "./util/smile";
+import {Autocomplete, Button, Divider, FormControl, IconButton, List, ListItem, Stack, TextField} from "@mui/material";
+import Grid from "@mui/material/Grid2";
+import Item from "../../styles/Item";
+import DeleteIcon from "@mui/icons-material/Delete";
+import fixedButton from "../../styles/fixedButton";
+import HourglassTopIcon from "@mui/icons-material/HourglassTop";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 
 const list = {
     width: '100%',
     bgcolor: 'background.paper',
     topMargin: '10px'
 };
+
 
 const emptyCategory = {
     no: '',
@@ -27,8 +27,7 @@ const defaultPresentLoad = {
     categoryNo: -1,
 }
 
-export default function Home() {
-
+export default function Action() {
     // 카테고리 목록
     const [categories, setCategories] = useState([]);
 
@@ -82,7 +81,7 @@ export default function Home() {
                         setCompletedList(c => ({
                             ...c,
                             [category.no]: {
-                                market: '11st',
+                                market: 'action',
                                 category: category,
                                 date: Date.now(),
                                 products: result
@@ -90,10 +89,10 @@ export default function Home() {
                         }));
                     }
                 }).catch(e => {
-                alert('상품 정보를 수집하는 중 오류가 발생했습니다.');
-                setPresentLoad(defaultPresentLoad);
-                console.error(e)
-            });
+                    alert('상품 정보를 수집하는 중 오류가 발생했습니다.');
+                    setPresentLoad(defaultPresentLoad);
+                    console.error(e)
+                });
         }
 
         setPresentLoad(defaultPresentLoad);
@@ -104,13 +103,11 @@ export default function Home() {
     return (
         <>
             <h1 style={{textAlign: 'center'}}>
-                11번가 슈팅배송 랭킹에 있는 상품을 스캔합니다
+                옥션 스마일배송  상품을 스캔합니다
             </h1>
             <h3 style={{textAlign: 'center'}}>
-                스캔할 카테고리를 선택하고 재생 버튼을 누르면 슈팅배송 목록을 스캔합니다.
+                스캔할 카테고리를 선택하고 재생 버튼을 누르면 상품 목록을 스캔합니다.
             </h3>
-
-
             <Stack
                 direction="column"
                 justifyContent="flex-start"
@@ -169,7 +166,7 @@ export default function Home() {
                 <div>
                     {
                         addFlag ? <>
-                            <FormControl variant="standard" sx={{width: '20ch'}}>
+                            <FormControl variant="standard" sx={{width: '30ch'}}>
                                 <Autocomplete
                                     {...defaultProps}
                                     id="auto-select"

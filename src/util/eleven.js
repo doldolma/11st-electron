@@ -2,7 +2,9 @@ import axios from "axios";
 
 const findType = 'PC_ProductGrid_Basic';
 
-export default async function getCategoryProducts(category) {
+export default async function getCategoryProducts(category, updateStatus) {
+
+    updateStatus("진행중");
 
     let data = (await axios.get("https://apis.11st.co.kr/pui/v2/page?pageId=PCSHOOTING_CATE&" + category.url)).data;
 
@@ -13,10 +15,10 @@ export default async function getCategoryProducts(category) {
 
     const isBigCategory = !category.url.includes('ctgr2No');
 
-    return (await findShootingBest(data.data, isBigCategory));
+    return (await findShootingBest(data.data, isBigCategory, updateStatus));
 }
 
-async function findShootingBest(carrList, isBigCategory) {
+async function findShootingBest(carrList, isBigCategory, updateStatus) {
     let items = [];
     let rank = 1;
 
@@ -54,10 +56,16 @@ async function findShootingBest(carrList, isBigCategory) {
         }
     }
 
+    let totalItems = items.length;
+
     let products = [];
 
     // 옵션 가져오기
+    let a = 0;
     for (const item of items) {
+        let progress = (++a / totalItems * 100).toFixed(1);
+        updateStatus(`진행중(${progress}%)`);
+
         let newVar = await getOptions(item.prdNo);
 
         if (!newVar) {
