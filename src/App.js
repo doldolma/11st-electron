@@ -1,14 +1,24 @@
 import './App.css';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {useEffect, useMemo, useState} from "react";
-import {blue, orange} from "@mui/material/colors";
-import {BottomNavigation, BottomNavigationAction, Container, CssBaseline, darkScrollbar, Paper} from "@mui/material";
+import {
+    BottomNavigation,
+    BottomNavigationAction,
+    Button,
+    Container,
+    CssBaseline,
+    darkScrollbar,
+    Paper
+} from "@mui/material";
 import Home from "./pages/Home";
 import Data from "./pages/Data";
 import Setting from "./pages/Setting";
 import {RecoilRoot} from "recoil";
 import Gmarket from "./component/gmarket/Gmarket";
 import Action from "./component/action/Action";
+import Snackbar from "./component/Snackbar";
+import snackbar from "./util/snackbar";
+const { ipcRenderer } = window.require('electron');
 
 function App() {
     const [darkMode, setDarkMode] = useState(false);
@@ -37,6 +47,7 @@ function App() {
     );
 
     useEffect(() => {
+        // vh 단위 계산
         let vh = 0;
         const setVh = () => {
             vh = window.innerHeight * 0.01;
@@ -46,8 +57,31 @@ function App() {
         window.addEventListener('resize', setVh)
         setVh()
 
+        // 업데이트 체크
+        ipcRenderer.on('update_available', (_, info) => {
+            snackbar.Success(`새 버전 ${info.version}이 사용 가능합니다. 다운로드를 시작합니다.`);
+        });
+
+        ipcRenderer.on('update_not_available', () => {
+            snackbar.Info('현재 최신 버전을 사용 중입니다.');
+        });
+
+        ipcRenderer.on('update_error', (_, err) => {
+            snackbar.Error(`업데이트 중 오류가 발생했습니다: ${err.message}`);
+        });
+
+        ipcRenderer.on('update_downloaded', () => {
+            if (window.confirm('새 버전이 다운로드되었습니다. 지금 재시작하시겠습니까?')) {
+                ipcRenderer.send('restart_app');
+            }
+        });
+
         return () => {
-            window.removeEventListener('resize', setVh)
+            window.removeEventListener('resize', setVh);
+            ipcRenderer.removeAllListeners('update_available');
+            ipcRenderer.removeAllListeners('update_not_available');
+            ipcRenderer.removeAllListeners('update_error');
+            ipcRenderer.removeAllListeners('update_downloaded');
         }
     }, []);
 
@@ -66,6 +100,9 @@ function App() {
             <CssBaseline/>
             <RecoilRoot>
                 <Container className="app-root" maxWidth="xl" style={{marginTop: '2rem', marginBottom: '5rem'}}>
+                    {/*<Button onClick={() => {*/}
+                    {/*    snackbar.Info("테스트");*/}
+                    {/*}}>테스트</Button>*/}
                     {/* 모든 페이지 컴포넌트를 렌더링하되, 현재 페이지만 표시 */}
                     <div style={{display: currentPage === 0 ? 'block' : 'none'}}><Home/></div>
                     <div style={{display: currentPage === 1 ? 'block' : 'none'}}><Gmarket /></div>
@@ -75,6 +112,7 @@ function App() {
                     <BottomNav value={currentPage} setValue={setCurrentPage}/>
                 </Container>
             </RecoilRoot>
+            <Snackbar/>
         </ThemeProvider>
     );
 }

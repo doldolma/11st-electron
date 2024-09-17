@@ -1,5 +1,5 @@
 // public/electron.js
-const { app, BrowserWindow, Menu, dialog } = require('electron');
+const { app, BrowserWindow, Menu, dialog, ipcMain } = require('electron');
 const path = require("path");
 const { autoUpdater } = require('electron-updater');
 const log = require('electron-log');
@@ -88,6 +88,40 @@ app.on("window-all-closed", () => {
     if (process.platform !== "darwin") app.quit();
 });
 
+// 자동 업데이트 이벤트 핸들러
+autoUpdater.on('update-available', () => {
+    mainWindow.webContents.send('update_available');
+});
+
+autoUpdater.on('update-downloaded', () => {
+    mainWindow.webContents.send('update_downloaded');
+});
+
+ipcMain.on('restart_app', () => {
+    autoUpdater.quitAndInstall();
+});
+
+// React 컴포넌트에서 업데이트 확인 요청을 처리
+ipcMain.on('check_for_update', () => {
+    autoUpdater.checkForUpdatesAndNotify();
+});
+
+// 업데이트 이벤트 처리
+autoUpdater.on('update-available', (info) => {
+    mainWindow.webContents.send('update_available', info);
+});
+
+autoUpdater.on('update-not-available', (info) => {
+    mainWindow.webContents.send('update_not_available', info);
+});
+
+autoUpdater.on('error', (err) => {
+    mainWindow.webContents.send('update_error', err);
+});
+
+autoUpdater.on('update-downloaded', (info) => {
+    mainWindow.webContents.send('update_downloaded', info);
+});
 
 function createAboutWindow() {
     dialog.showMessageBox(mainWindow, {

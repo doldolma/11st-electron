@@ -1,7 +1,7 @@
 import Grid from '@mui/material/Grid2';
-import {FormControlLabel, FormGroup, styled, Switch, useMediaQuery} from "@mui/material";
+import {Button, FormControlLabel, FormGroup, styled, Switch, useMediaQuery} from "@mui/material";
 import {useEffect} from "react";
-
+const { ipcRenderer } = window.require('electron');
 
 // 다크모드 선택 스위치
 const MaterialUISwitch = styled(Switch)(({theme}) => ({
@@ -67,6 +67,10 @@ export default function Setting({darkMode, setDarkMode}) {
 
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
+    const checkUpdate = () => {
+        ipcRenderer.send('check_for_update');
+    }
+
     return (
         <Grid container spacing={2}>
             <FormGroup>
@@ -84,6 +88,10 @@ export default function Setting({darkMode, setDarkMode}) {
                             setDarkMode(darkMode)
                         }}/>
                     } label=''/>
+                </Grid>
+                <br />
+                <Grid size={12}>
+                    <Button variant="contained" onClick={checkUpdate}>업데이트 확인</Button>
                 </Grid>
             </FormGroup>
         </Grid>
