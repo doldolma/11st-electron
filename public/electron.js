@@ -107,8 +107,8 @@ ipcMain.on('check_for_update', () => {
 });
 
 // 버전 조회
-ipcMain.on('get-app-version', (event) => {
-    event.returnValue = app.getVersion();
+ipcMain.handle('get-app-version', () => {
+    return app.getVersion();
 });
 
 // 업데이트 이벤트 처리

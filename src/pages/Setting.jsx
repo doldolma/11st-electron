@@ -2,8 +2,10 @@ import Grid from '@mui/material/Grid2';
 import {Button, FormControlLabel, FormGroup, styled, Switch, useMediaQuery} from "@mui/material";
 import {useEffect, useState} from "react";
 import {ipcEventManager} from "../util/ipcEventManager";
-
+import LoadingButton from '@mui/lab/LoadingButton';
+import snackbar from "../util/snackbar";
 const {ipcRenderer} = window.require('electron');
+
 
 // 다크모드 선택 스위치
 const MaterialUISwitch = styled(Switch)(({theme}) => ({
@@ -53,6 +55,8 @@ const MaterialUISwitch = styled(Switch)(({theme}) => ({
     },
 }));
 
+let timeoutFunc = null;
+
 export default function Setting({darkMode, setDarkMode}) {
 
     const [version, setVersion] = useState("develop");
@@ -70,15 +74,14 @@ export default function Setting({darkMode, setDarkMode}) {
         }
 
         // 버전 정보 가져오기
-        if (window.electron) {
-            window.electron.getAppVersion()
-                .then(appVersion => {
-                    setVersion(appVersion);
-                })
-        }
+        ipcRenderer.invoke('get-app-version').then(v => setVersion(v));
 
         const restoreLoad = () => {
             setLoad(false);
+            if (timeoutFunc) {
+                clearTimeout(timeoutFunc);
+                timeoutFunc = null;
+            }
         }
 
         // 업데이트 정보 리스너
@@ -96,8 +99,13 @@ export default function Setting({darkMode, setDarkMode}) {
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
     const checkUpdate = () => {
-        ipcRenderer.send('check_for_update');
         setLoad(true);
+        timeoutFunc = setTimeout(() => {
+            setLoad(false);
+            snackbar.Error('최신 업데이트 정보를 가져오지 못했습니다.');
+        }, 8000);
+
+        ipcRenderer.send('check_for_update');
         ipcRenderer.on('update_available', () => {
             setLoad(false);
         });
@@ -127,7 +135,7 @@ export default function Setting({darkMode, setDarkMode}) {
                 </Grid>
                 <br/>
                 <Grid size={12}>
-                    <Button variant="contained" disabled={load} onClick={checkUpdate}>업데이트 확인</Button>
+                    <LoadingButton loading={load} variant="outlined"  onClick={checkUpdate}>업데이트 확인</LoadingButton>
                 </Grid>
             </FormGroup>
         </Grid>
