@@ -1,7 +1,9 @@
 import Grid from '@mui/material/Grid2';
 import {Button, FormControlLabel, FormGroup, styled, Switch, useMediaQuery} from "@mui/material";
 import {useEffect, useState} from "react";
-const { ipcRenderer } = window.require('electron');
+import {ipcEventManager} from "../util/ipcEventManager";
+
+const {ipcRenderer} = window.require('electron');
 
 // 다크모드 선택 스위치
 const MaterialUISwitch = styled(Switch)(({theme}) => ({
@@ -54,6 +56,7 @@ const MaterialUISwitch = styled(Switch)(({theme}) => ({
 export default function Setting({darkMode, setDarkMode}) {
 
     const [version, setVersion] = useState("develop");
+    const [load, setLoad] = useState(false);
 
     useEffect(() => {
         // Dark 모드 설정 가져오기 (From LocalStorage)
@@ -67,12 +70,26 @@ export default function Setting({darkMode, setDarkMode}) {
         }
 
         // 버전 정보 가져오기
-        const getVersion = async () => {
-          if (window.electron) {
-              const appVersion = await window.electron.getAppVersion();
-              setVersion(appVersion);
-          }
-        };
+        if (window.electron) {
+            window.electron.getAppVersion()
+                .then(appVersion => {
+                    setVersion(appVersion);
+                })
+        }
+
+        const restoreLoad = () => {
+            setLoad(false);
+        }
+
+        // 업데이트 정보 리스너
+        ipcEventManager.on('update_available', restoreLoad);
+
+        ipcEventManager.on('update_not_available', restoreLoad);
+
+        return () => {
+            ipcEventManager.off('update_available', restoreLoad);
+            ipcEventManager.off('update_not_available', restoreLoad);
+        }
 
     }, []);
 
@@ -80,6 +97,10 @@ export default function Setting({darkMode, setDarkMode}) {
 
     const checkUpdate = () => {
         ipcRenderer.send('check_for_update');
+        setLoad(true);
+        ipcRenderer.on('update_available', () => {
+            setLoad(false);
+        });
     }
 
     return (
@@ -100,13 +121,13 @@ export default function Setting({darkMode, setDarkMode}) {
                         }}/>
                     } label=''/>
                 </Grid>
-                <br />
+                <br/>
                 <Grid size={12}>
                     현재 버전 : {version}
                 </Grid>
-                <br />
+                <br/>
                 <Grid size={12}>
-                    <Button variant="contained" onClick={checkUpdate}>업데이트 확인</Button>
+                    <Button variant="contained" disabled={load} onClick={checkUpdate}>업데이트 확인</Button>
                 </Grid>
             </FormGroup>
         </Grid>

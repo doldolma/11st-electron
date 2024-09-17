@@ -17,7 +17,7 @@ app.commandLine.appendSwitch('unlimited-storage');
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1280,
-        height: 720,
+        height: 900,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
