@@ -106,6 +106,11 @@ ipcMain.on('check_for_update', () => {
     autoUpdater.checkForUpdatesAndNotify();
 });
 
+// 버전 조회
+ipcMain.on('get-app-version', (event) => {
+    event.returnValue = app.getVersion();
+});
+
 // 업데이트 이벤트 처리
 autoUpdater.on('update-available', (info) => {
     mainWindow.webContents.send('update_available', info);

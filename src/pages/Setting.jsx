@@ -1,6 +1,6 @@
 import Grid from '@mui/material/Grid2';
 import {Button, FormControlLabel, FormGroup, styled, Switch, useMediaQuery} from "@mui/material";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 const { ipcRenderer } = window.require('electron');
 
 // 다크모드 선택 스위치
@@ -53,6 +53,8 @@ const MaterialUISwitch = styled(Switch)(({theme}) => ({
 
 export default function Setting({darkMode, setDarkMode}) {
 
+    const [version, setVersion] = useState("develop");
+
     useEffect(() => {
         // Dark 모드 설정 가져오기 (From LocalStorage)
         const darkMode = localStorage.getItem('darkMode');
@@ -63,6 +65,15 @@ export default function Setting({darkMode, setDarkMode}) {
         } else {
             setDarkMode(prefersDarkMode);
         }
+
+        // 버전 정보 가져오기
+        const getVersion = async () => {
+          if (window.electron) {
+              const appVersion = await window.electron.getAppVersion();
+              setVersion(appVersion);
+          }
+        };
+
     }, []);
 
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
@@ -88,6 +99,10 @@ export default function Setting({darkMode, setDarkMode}) {
                             setDarkMode(darkMode)
                         }}/>
                     } label=''/>
+                </Grid>
+                <br />
+                <Grid size={12}>
+                    현재 버전 : {version}
                 </Grid>
                 <br />
                 <Grid size={12}>
