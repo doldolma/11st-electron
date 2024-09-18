@@ -73,8 +73,8 @@ export default function Data() {
                                 return (
                                     <TableRow key={key}>
                                         <TableCell>{products[key].market}</TableCell>
-                                        <TableCell>{key}</TableCell>
-                                        <TableCell>{products[key].category.name}</TableCell>
+                                        <TableCell>{products[key].type === 'minishop' ? 'minishop' : key }</TableCell>
+                                        <TableCell>{products[key].type === 'minishop' ? key : products[key].category.name}</TableCell>
                                         <TableCell>{new Date(products[key].date).toLocaleString()}</TableCell>
                                         <TableCell>{products[key].products.length}</TableCell>
                                         <TableCell sx={{ textAlign: 'center' }}>

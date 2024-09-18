@@ -18,6 +18,7 @@ import Gmarket from "./component/gmarket/Gmarket";
 import Action from "./component/action/Action";
 import Snackbar from "./component/Snackbar";
 import snackbar from "./util/snackbar";
+import GmarketMinishop from "./component/gmarket/GmarketMinishop";
 const { ipcRenderer } = window.require('electron');
 
 function App() {
@@ -106,9 +107,10 @@ function App() {
                     {/* 모든 페이지 컴포넌트를 렌더링하되, 현재 페이지만 표시 */}
                     <div style={{display: currentPage === 0 ? 'block' : 'none'}}><Home/></div>
                     <div style={{display: currentPage === 1 ? 'block' : 'none'}}><Gmarket /></div>
-                    <div style={{display: currentPage === 2 ? 'block' : 'none'}}><Action /></div>
-                    <div style={{display: currentPage === 3 ? 'block' : 'none'}}><Data/></div>
-                    <div style={{display: currentPage === 4 ? 'block' : 'none'}}><Setting darkMode={darkMode}  setDarkMode={setDarkMode}/></div>
+                    <div style={{display: currentPage === 2 ? 'block' : 'none'}}><GmarketMinishop /></div>
+                    <div style={{display: currentPage === 3 ? 'block' : 'none'}}><Action /></div>
+                    <div style={{display: currentPage === 4 ? 'block' : 'none'}}><Data/></div>
+                    <div style={{display: currentPage === 5 ? 'block' : 'none'}}><Setting darkMode={darkMode}  setDarkMode={setDarkMode}/></div>
                     <BottomNav value={currentPage} setValue={setCurrentPage}/>
                 </Container>
             </RecoilRoot>
@@ -131,6 +133,7 @@ function BottomNav({value, setValue}) {
             >
                 <BottomNavigationAction label="11번가"/>
                 <BottomNavigationAction label="지마켓"/>
+                <BottomNavigationAction label="지마켓-미니샵"/>
                 <BottomNavigationAction label="옥션"/>
                 <BottomNavigationAction label="데이터"/>
                 <BottomNavigationAction label="앱 설정"/>

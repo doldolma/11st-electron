@@ -26,9 +26,11 @@ export default async function saveGmarketExcel(product) {
 function preProcess(productInfo) {
     return productInfo.products.map(p => {
         if (!p) return {};
+
+        console.log("p", p);
         return {
             '랭킹': parseNumber(p.rank),
-            '카테고리': productInfo.category.name,
+            '카테고리': productInfo.category.name ? productInfo.category.name : p.categoryName,
             '카테고리번호': productInfo.category.no,
             '상품명': p.itemName,
             '상품번호': p.itemNo,

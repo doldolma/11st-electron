@@ -59,7 +59,7 @@ export default async function getCategoryProducts(category, updateStatus) {
 
 
 // 상세 페이지
-async function getProductInfo(product) {
+export async function getProductInfo(product) {
     // 조회
     let data =await  (await fetch("https://item.gmarket.co.kr/Item?goodscode="+product.itemNo, {
         "headers": {
@@ -74,7 +74,6 @@ async function getProductInfo(product) {
             "sec-fetch-site": "same-origin",
             "sec-fetch-user": "?1",
             "upgrade-insecure-requests": "1",
-            "Referer": "https://www.gmarket.co.kr",
             "Referrer-Policy": "strict-origin-when-cross-origin"
         },
         "body": null,
@@ -83,6 +82,47 @@ async function getProductInfo(product) {
 
     let $ = cheerio.load(data);
 
+    // 상품 정보
+    product.itemName = $("#itemcase_basic > div.box__item-title > div.box__item-info > h1").text();
+    product.imageUrl = "https" +  $("#container > div.item-topinfowrap > div.thumb-gallery.uxecarousel > div.box__viewer-container > ul > li.on > a > img").first().attr("src");
+    // 카테고리
+    let categoryLi =  $("body > div.location-navi > ul > li")
+
+    let i = 0;
+    let categoryName = "";
+    for (const categoryLiElement of categoryLi) {
+        i++;
+
+        let catName = $(categoryLiElement).find("a").first().text();
+
+        if (i === 1) continue;
+        if (i === 2) {
+            categoryName = catName;
+        } else {
+            categoryName = categoryName + " > " + catName;
+        }
+    }
+    product.categoryName = categoryName;
+
+    // 별점
+    const span = $("#itemcase_basic > div.box__item-title > div.box__item-info > div.box__rating-information > div > span");
+    const style = span.attr('style');
+    if (style) {
+        const widthMatch = style.match(/width:\s*(\d+(?:\.\d+)?%)/);
+        if (widthMatch) {
+            const width = widthMatch[1];
+            product.reviewPoint = (5 * (parseFloat(width) / 100)).toFixed(1);
+        } else {
+        }
+    } else {
+    }
+    // 별점 갯수
+    product.reviewCount = parseInt($("#itemcase_basic > div.box__item-title > div.box__item-info > div.box__rating-information > span.box__rating-number").text().replaceAll("(", "").replaceAll(")", "").replaceAll(",", "").trim())
+
+    // 가격
+    product.itemPrice = Number($("#itemcase_basic > div.box__item-title > div.box__price.price > span:nth-child(3) > strong").text().replaceAll(",", "").replaceAll("원", "").trim());
+
+    // 옵션 목록
     let lis = $("#coreFormTop > div > div > div > ul > li");
 
     // 옵션 없음.
@@ -106,4 +146,16 @@ async function getProductInfo(product) {
         products.push(productOption);
     }
     return products;
+}
+
+// 단순히 이름과 가격만 있는 진짜 옵션
+function getOptions(document) {
+    let lis = document("#optOrderComb_0 > ul > li")
+
+    let options = [];
+    for (const li of lis) {
+
+    }
+
+    return options;
 }
