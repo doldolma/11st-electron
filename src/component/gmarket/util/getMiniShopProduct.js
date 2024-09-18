@@ -9,9 +9,9 @@ export default async function getMinishopProduct(customer, updateStatus) {
     let items = [];
     let rank = 0;
 
-    for (let i=1; i < 2; i++) {
+    for (let i=1; i < 100; i++) {
         // 상품 목록 URL
-        let url = "https://minishop.gmarket.co.kr/" + customer.customerId + "/List?CategoryType=General&SortType=" + customer.sort.code + "&DisplayType=LargeImage&Page=" + i + "&PageSize=10"
+        let url = "https://minishop.gmarket.co.kr/" + customer.customerId + "/List?CategoryType=General&SortType=" + customer.sort.code + "&DisplayType=LargeImage&Page=" + i + "&PageSize=100"
 
         let data = await getProductList(url);
 
