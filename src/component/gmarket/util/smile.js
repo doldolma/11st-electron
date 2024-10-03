@@ -47,9 +47,6 @@ export default async function getCategoryProducts(category, updateStatus) {
             continue;
         }
     }
-    console.log("items", items);
-
-    items = items.slice(0, 10);
 
     let allProducts = [];
     const totalItems = items.length;
