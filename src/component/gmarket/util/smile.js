@@ -47,9 +47,13 @@ export default async function getCategoryProducts(category, updateStatus) {
             continue;
         }
     }
+    console.log("items", items);
+
+    items = items.slice(0, 10);
 
     let allProducts = [];
     const totalItems = items.length;
+
 
     let a = 0;
     for (const item of items) {
@@ -113,23 +117,32 @@ export async function getProductInfo(product) {
     }
     product.categoryName = categoryName;
 
-    // 별점
-    const span = $("#itemcase_basic > div.box__item-title > div.box__item-info > div.box__rating-information > div > span");
-    const style = span.attr('style');
-    if (style) {
-        const widthMatch = style.match(/width:\s*(\d+(?:\.\d+)?%)/);
-        if (widthMatch) {
-            const width = widthMatch[1];
-            product.reviewPoint = (5 * (parseFloat(width) / 100)).toFixed(1);
-        } else {
-        }
-    } else {
+    if (product?.reviewPoint?.reviewCount) {
+        product.reviewCount = product?.reviewPoint?.reviewCount;
+        product.reviewPoint = product?.reviewPoint?.starPoint
     }
-    // 별점 갯수
-    product.reviewCount = parseInt($("#itemcase_basic > div.box__item-title > div.box__item-info > div.box__rating-information > span.box__rating-number").text().replaceAll("(", "").replaceAll(")", "").replaceAll(",", "").trim())
+
+    // 별점
+    if (!product.reviewCount) {
+        const span = $("#itemcase_basic > div.box__item-title > div.box__item-info > div.box__rating-information > div > span");
+        const style = span.attr('style');
+        if (style) {
+            const widthMatch = style.match(/width:\s*(\d+(?:\.\d+)?%)/);
+            if (widthMatch) {
+                const width = widthMatch[1];
+                product.reviewPoint = (5 * (parseFloat(width) / 100)).toFixed(1);
+            } else {
+            }
+        }
+        // 별점 갯수
+        product.reviewCount = parseInt($("#itemcase_basic > div.box__item-title > div.box__item-info > div.box__rating-information > span.box__rating-number").text().replaceAll("(", "").replaceAll(")", "").replaceAll(",", "").trim())
+    }
 
     // 가격
-    product.itemPrice = Number($("#itemcase_basic > div.box__item-title > div.box__price.price > span:nth-child(3) > strong").text().replaceAll(",", "").replaceAll("원", "").trim());
+    if (!product.itemPrice) {
+        product.itemPrice = Number($("#itemcase_basic > div.box__item-title > div.box__price.price > span:nth-child(3) > strong").text().replaceAll(",", "").replaceAll("원", "").trim());
+    }
+
 
     // 옵션 목록
     let lis = $("#coreFormTop > div > div > div > ul > li");

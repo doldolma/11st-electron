@@ -39,8 +39,9 @@ function preProcess(productInfo) {
             '할인율': null,
             '링크': p.itemUrl,
             '이미지링크': p.imageUrl,
-            '리뷰점수': parseNumber(p.reviewPoint?.startPoint),
-            '리뷰갯수': parseNumber(p.reviewPoint?.reviewCount),
+            '리뷰점수': parseNumber(p.reviewPoint),
+            '리뷰갯수': parseNumber(p.reviewCount),
+            '구매개수': parseNumber(p.buyCount)
         }
     });
 }
