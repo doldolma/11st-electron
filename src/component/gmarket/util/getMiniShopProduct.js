@@ -1,4 +1,5 @@
 import {getProductInfo} from "./smile";
+import sleep from "../../../util/sleep";
 
 const cheerio = require('cheerio');
 
@@ -37,6 +38,8 @@ export default async function getMinishopProduct(customer, updateStatus) {
                 itemNo: productNo,
             })
         }
+
+        await sleep(1500)
     }
 
     let allProducts = [];

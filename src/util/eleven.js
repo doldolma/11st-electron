@@ -6,7 +6,7 @@ export default async function getCategoryProducts(category, updateStatus) {
 
     updateStatus("진행중");
 
-    let data = (await axios.get("https://apis.11st.co.kr/pui/v2/page?pageId=PCSHOOTING_CATE&" + category.url)).data;
+    let data = (await axios.get("https://apis.11st.co.kr/pui/v2/page?pageId=PCSHOOTING_CATE&" + category.url + "&sort=" + category.sort)).data;
 
     if (data.resultCode !== 200) {
         console.log("통신에러");
@@ -29,7 +29,7 @@ export default async function getCategoryProducts(category, updateStatus) {
 
 async function getBigCategoryProducts(category) {
 
-    let data = (await axios.get("https://apis.11st.co.kr/pui/v2/page?pageId=PCSHOOTING_CATE&" + category.url)).data;
+    let data = (await axios.get("https://apis.11st.co.kr/pui/v2/page?pageId=PCSHOOTING_CATE&" + category.url + "&sort=" + category.sort)).data;
 
     if (data.resultCode !== 200) {
         console.log("통신에러");
@@ -78,7 +78,7 @@ async function getSmallCategoryProducts(category) {
     let rank = 1;
 
     for (let i = 1; i < 10; i++) {
-        let data = (await axios.get("https://apis.11st.co.kr/pui/v2/page?pageId=PCSHOOTING_CATE&" + category.url + "&pageNo=" + i)).data;
+        let data = (await axios.get("https://apis.11st.co.kr/pui/v2/page?pageId=PCSHOOTING_CATE&" + category.url + "&pageNo=" + i + "&sort=" + category.sort)).data;
 
         if (data.resultCode !== 200) {
             console.log("통신에러");

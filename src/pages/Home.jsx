@@ -1,5 +1,16 @@
 import {useEffect, useState} from "react";
-import {Autocomplete, Button, Divider, FormControl, IconButton, List, ListItem, Stack, TextField} from "@mui/material";
+import {
+    Autocomplete,
+    Button,
+    Divider,
+    FormControl,
+    IconButton,
+    List,
+    ListItem,
+    MenuItem,
+    Stack,
+    TextField
+} from "@mui/material";
 import Item from "../styles/Item";
 import Grid from "@mui/material/Grid2";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -10,6 +21,7 @@ import getCategoryProducts from "../util/eleven";
 import {useRecoilState} from "recoil";
 import product from "../atoms/product";
 import defaultCategory from '../util/category';
+import elevenSorted from "../util/elevenSorted";
 
 
 const list = {
@@ -21,6 +33,7 @@ const list = {
 const emptyCategory = {
     no: '',
     name: '',
+    sort: "pop",
 }
 
 const defaultPresentLoad = {
@@ -123,8 +136,11 @@ export default function Home() {
                             <Grid size={2}>
                                 <Item><h3>번호</h3></Item>
                             </Grid>
-                            <Grid size={6}>
+                            <Grid size={4}>
                                 <Item><h3>카테고리</h3></Item>
+                            </Grid>
+                            <Grid size={2}>
+                                <Item><h3>정렬</h3></Item>
                             </Grid>
                             <Grid size={2}>
                                 <Item><h3>상태</h3></Item>
@@ -142,8 +158,11 @@ export default function Home() {
                                     <Grid size={2}>
                                         <Item>{category.no}</Item>
                                     </Grid>
-                                    <Grid size={6}>
+                                    <Grid size={4}>
                                         <Item>{category.name}</Item>
+                                    </Grid>
+                                    <Grid size={2}>
+                                        <Item>{elevenSorted.find(s => s.val === category.sort).name}</Item>
                                     </Grid>
                                     <Grid size={2}>
                                         <Item>
@@ -176,16 +195,33 @@ export default function Home() {
                                     autoSelect
                                     value={newCategory}
                                     onChange={(e, newValue) => {
-                                        setNewCategory(newValue);
+                                        setNewCategory({
+                                            ...newCategory,
+                                            ...newValue,
+                                        });
                                     }}
                                     renderInput={(params) => (
                                         <TextField {...params} label="카테고리" variant="standard" />
                                     )}
                                 />
+                                <TextField select label="정렬" variant="filled" value={newCategory.sort} onChange={e => {
+                                    setNewCategory({
+                                        ...newCategory,
+                                        sort: e.target.value
+                                    });
+                                }}>
+                                    {
+                                        elevenSorted.map((sort, i) => {
+                                            return (
+                                                <MenuItem key={i} value={sort.val}>{sort.name}</MenuItem>
+                                            )
+                                        })
+                                    }
+                                </TextField>
                             </FormControl>
                             <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
                                 <Button variant="contained" onClick={() => {
-                                    if (!newCategory || !newCategory.no) {
+                                    if (!newCategory || !newCategory.no || !newCategory.sort) {
                                         return;
                                     }
                                     if (Object.keys(completedList).includes(newCategory.no)) {

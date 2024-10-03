@@ -3,13 +3,25 @@ import {useRecoilState} from "recoil";
 import product from "../../atoms/product";
 import defaultCategory from "./util/smile_categories";
 import getCategoryProducts from "./util/smile";
-import {Autocomplete, Button, Divider, FormControl, IconButton, List, ListItem, Stack, TextField} from "@mui/material";
+import {
+    Autocomplete,
+    Button,
+    Divider,
+    FormControl,
+    IconButton,
+    List,
+    ListItem,
+    MenuItem,
+    Stack,
+    TextField
+} from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import Item from "../../styles/Item";
 import DeleteIcon from "@mui/icons-material/Delete";
 import fixedButton from "../../styles/fixedButton";
 import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import sorted from "./util/sorted";
 
 const list = {
     width: '100%',
@@ -21,6 +33,7 @@ const list = {
 const emptyCategory = {
     no: '',
     name: '',
+    sort: '8',
 }
 
 const defaultPresentLoad = {
@@ -120,8 +133,11 @@ export default function Gmarket() {
                             <Grid size={2}>
                                 <Item><h3>번호</h3></Item>
                             </Grid>
-                            <Grid size={6}>
+                            <Grid size={4}>
                                 <Item><h3>카테고리</h3></Item>
+                            </Grid>
+                            <Grid size={2}>
+                                <Item><h3>정렬</h3></Item>
                             </Grid>
                             <Grid size={2}>
                                 <Item><h3>상태</h3></Item>
@@ -139,8 +155,11 @@ export default function Gmarket() {
                                     <Grid size={2}>
                                         <Item>{category.no}</Item>
                                     </Grid>
-                                    <Grid size={6}>
+                                    <Grid size={4}>
                                         <Item>{category.name}</Item>
+                                    </Grid>
+                                    <Grid size={2}>
+                                        <Item>{sorted.find(s => s.val === category.sort).name}</Item>
                                     </Grid>
                                     <Grid size={2}>
                                         <Item>
@@ -173,16 +192,33 @@ export default function Gmarket() {
                                     autoSelect
                                     value={newCategory}
                                     onChange={(e, newValue) => {
-                                        setNewCategory(newValue);
+                                        setNewCategory({
+                                            ...newCategory,
+                                            ...newValue,
+                                        });
                                     }}
                                     renderInput={(params) => (
                                         <TextField {...params} label="카테고리" variant="standard" />
                                     )}
                                 />
+                                <TextField select label="정렬" variant="filled" value={newCategory.sort} onChange={e => {
+                                    setNewCategory({
+                                        ...newCategory,
+                                        sort: e.target.value
+                                    });
+                                }}>
+                                    {
+                                        sorted.map((sort, i) => {
+                                            return (
+                                                <MenuItem key={i} value={sort.val}>{sort.name}</MenuItem>
+                                            )
+                                        })
+                                    }
+                                </TextField>
                             </FormControl>
                             <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
                                 <Button variant="contained" onClick={() => {
-                                    if (!newCategory || !newCategory.no) {
+                                    if (!newCategory || !newCategory.no || !newCategory.sort) {
                                         return;
                                     }
                                     if (Object.keys(completedList).includes(newCategory.no)) {

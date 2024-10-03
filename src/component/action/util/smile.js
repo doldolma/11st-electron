@@ -1,4 +1,14 @@
+import sleep from "../../../util/sleep";
+
 const cheerio = require('cheerio');
+
+
+const min = 900;
+const max = 2000;
+const rand = () => {
+
+    return Math.floor(Math.random() * (max - min + 1)) + min
+}
 
 export default async function getCategoryProducts(category, updateStatus) {
 
@@ -67,6 +77,7 @@ export default async function getCategoryProducts(category, updateStatus) {
         let progress = (++a / totalItems * 100).toFixed(1);
         updateStatus(`진행중(${progress}%)`);
 
+        await sleep(rand());
         let options = await getProductInfo(product);
         allProducts = [...allProducts, ...options];
     }

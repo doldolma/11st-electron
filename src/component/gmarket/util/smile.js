@@ -1,12 +1,20 @@
 import axios from "axios";
+import sleep from "../../../util/sleep";
 const cheerio = require('cheerio');
+
+const min = 100;
+const max = 500;
+const rand = () => {
+
+    return Math.floor(Math.random() * (max - min + 1)) + min
+}
 
 export default async function getCategoryProducts(category, updateStatus) {
 
     updateStatus("진행중");
 
     // 카테고리 상품 목록
-    let url = "https://www.gmarket.co.kr/n/smiledelivery/api/smiledelivery/category?categoryCode=" + category.no;
+    let url = "https://www.gmarket.co.kr/n/smiledelivery/api/smiledelivery/category?categoryCode=" + category.no + "&s=" + category.sort;
     let response = (await axios.get(url));
 
     if (response.status !== 200) {
@@ -50,6 +58,7 @@ export default async function getCategoryProducts(category, updateStatus) {
         updateStatus(`진행중(${progress}%)`);
 
         // 상품 옵션 가져오기 (상품 상세 페이지에서)
+        await sleep(rand());
         let options = await getProductInfo(item);
         allProducts = [...allProducts, ...options];
     }
