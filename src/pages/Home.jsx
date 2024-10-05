@@ -188,7 +188,7 @@ export default function Home() {
                 <div>
                     {
                         addFlag ? <>
-                            <FormControl variant="standard" sx={{width: '20ch'}}>
+                            <FormControl variant="standard" sx={{width: '30ch'}}>
                                 <Autocomplete
                                     {...defaultProps}
                                     id="auto-select"

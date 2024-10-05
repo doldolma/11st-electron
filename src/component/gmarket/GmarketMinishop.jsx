@@ -92,10 +92,10 @@ export default function GmarketMinishop() {
                     if (result) {
                         setCompletedList(c => ({
                             ...c,
-                            [customer.customerId]: {
+                            [customer.customerId + customer?.category?.categoryNum]: {
                                 type: "minishop",
                                 market: 'gmarket',
-                                category: {},
+                                category: customer.category ? category : {},
                                 customer: customer,
                                 date: Date.now(),
                                 products: result
@@ -295,7 +295,7 @@ export default function GmarketMinishop() {
                                         return;
                                     }
 
-                                    if (Object.keys(completedList).includes(newCustomer.customerId)) {
+                                    if (Object.keys(completedList).includes(newCustomer.customerId + category?.categoryNum)) {
                                         alert('이미 스캔된 판매자입니다.');
                                         return;
                                     }
