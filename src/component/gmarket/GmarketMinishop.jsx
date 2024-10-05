@@ -40,6 +40,13 @@ const defaultCategory = {
     category3: [],
 };
 
+const getCustomerKey = (customer) => {
+    if (!customer.category) {
+        return customer.customerId;
+    }
+    return customer.customerId + "-" + customer.category.categoryName;
+}
+
 export default function GmarketMinishop() {
 
     // 판매자 목록
@@ -76,9 +83,9 @@ export default function GmarketMinishop() {
         setCustomers(customers.filter((_, index) => index !== i));
     }
 
-    const updatePresentStatus = (customerIdWithCat) => (load) => {
+    const updatePresentStatus = (customerKey) => (load) => {
         setPresentLoad({
-            customerIdWithCat: customerIdWithCat,
+            customerKey: customerKey,
             load: load,
         });
     }
@@ -87,12 +94,12 @@ export default function GmarketMinishop() {
         for (const customer of customers) {
             if (Object.keys(completedList).includes(String(customer.customerId))) continue;
 
-            await getMinishopProduct(customer, updatePresentStatus(customer.customerId + customer?.category?.categoryNum))
+            await getMinishopProduct(customer, updatePresentStatus(getCustomerKey(customer)))
                 .then(result => {
                     if (result) {
                         setCompletedList(c => ({
                             ...c,
-                            [customer.customerId + customer?.category?.categoryNum]: {
+                            [getCustomerKey(customer)]: {
                                 type: "minishop",
                                 market: 'gmarket',
                                 category: customer.category ? category : {},
@@ -166,8 +173,8 @@ export default function GmarketMinishop() {
                                     <Grid size={2}>
                                         <Item>
                                             {
-                                                presentLoad.customerIdWithCat === (customer.customerId + customer?.category?.categoryNum) ? presentLoad.load : (
-                                                    Object.keys(completedList).includes(String(customer.customerId)) ? '완료됨' : '대기중'
+                                                presentLoad.customerKey === getCustomerKey(customer) ? presentLoad.load : (
+                                                    Object.keys(completedList).includes(getCustomerKey(customer)) ? '완료됨' : '대기중'
                                                 )
                                             }
                                         </Item>
