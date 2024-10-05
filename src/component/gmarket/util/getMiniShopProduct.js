@@ -70,7 +70,7 @@ export default async function getMinishopProduct(customer, updateStatus) {
             allProducts.push(option);
         }
 
-        await sleep(rand(2000, 5000))
+        await sleep(rand(2000, 4000))
     }
 
     return allProducts;

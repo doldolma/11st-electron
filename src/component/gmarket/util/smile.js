@@ -2,8 +2,8 @@ import axios from "axios";
 import sleep from "../../../util/sleep";
 const cheerio = require('cheerio');
 
-const min = 100;
-const max = 500;
+const min = 500;
+const max = 2000;
 const rand = () => {
 
     return Math.floor(Math.random() * (max - min + 1)) + min
@@ -70,27 +70,8 @@ export default async function getCategoryProducts(category, updateStatus) {
 
 // 상세 페이지
 export async function getProductInfo(product) {
-    // 조회
-    let data =await  (await fetch("https://item.gmarket.co.kr/Item?goodscode="+product.itemNo, {
-        "headers": {
-            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-            "accept-language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
-            "priority": "u=0, i",
-            "sec-ch-ua": "\"Chromium\";v=\"128\", \"Not;A=Brand\";v=\"24\", \"Google Chrome\";v=\"128\"",
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": "\"macOS\"",
-            "sec-fetch-dest": "document",
-            "sec-fetch-mode": "navigate",
-            "sec-fetch-site": "same-origin",
-            "sec-fetch-user": "?1",
-            "upgrade-insecure-requests": "1",
-            "Referrer-Policy": "strict-origin-when-cross-origin"
-        },
-        "body": null,
-        "method": "GET"
-    })).text();
 
-    let $ = cheerio.load(data);
+    let $ = await getProductHtml(product.itemNo);
 
     // 상품 정보
     product.itemName = $("#itemcase_basic > div.box__item-title > div.box__item-info > h1").text();
@@ -136,17 +117,9 @@ export async function getProductInfo(product) {
     }
 
     // 가격
-    if (!product.itemPrice) {
-        // 쿠폰가
-        product.itemPrice = Number($("#itemcase_basic > div.box__item-title > div.box__price.price .price_innerwrap-coupon .price_real").text().replaceAll(",", "").replaceAll("원", "").trim());
-        if (!product.itemPrice) {
-            // 쿠폰가 없으면 그냥 가격
-            product.itemPrice = Number($("#itemcase_basic > div.box__item-title > div.box__price.price .price_real").text().replaceAll(",", "").replaceAll("원", "").trim());
-        }
-
-        console.log("price", product.itemPrice)
-
-    }
+    let price = getPrice($);
+    product.itemPrice = price.itemPrice;
+    product.sellPrice = price.sellPrice;
 
     // 옵션 목록
     let lis = $("#coreFormTop > div > div > div > ul > li");
@@ -167,11 +140,66 @@ export async function getProductInfo(product) {
         // productOption.imageUrl = "https:" + optionTag.find('div.thumb img').attr('src');
         productOption.imageUrl = "https://gdimg.gmarket.co.kr/" + productOption.itemNo + "/still/1200"
         productOption.itemName = optionTag.find('span.item_tit').text();
-        productOption.itemPrice = optionTag.find('span.item_price:not(.item_price-coupon)').text().trim();
+        // productOption.itemPrice = optionTag.find('span.item_price:not(.item_price-coupon)').text().trim();
+
+        // 가격 가져오기 위해 상세 상품 정보 로딩
+        let optionHtml = await getProductHtml(productOption.itemNo);
+        let price = getPrice(optionHtml);
+        productOption.itemPrice = price.itemPrice;
+        productOption.sellPrice = price.sellPrice;
 
         products.push(productOption);
+
+        sleep(rand());
     }
     return products;
+}
+
+function getPrice($) {
+    // 쿠폰가
+    let itemPrice = Number($("#itemcase_basic > div.box__item-title > div.box__price.price .price_innerwrap-coupon .price_real").text().replaceAll(",", "").replaceAll("원", "").trim());
+    if (!itemPrice) {
+        // 쿠폰가 없으면 그냥 가격
+        itemPrice = Number($("#itemcase_basic > div.box__item-title > div.box__price.price .price_real").text().replaceAll(",", "").replaceAll("원", "").trim());
+    }
+
+    // 원래가격
+    let original = $("#itemcase_basic > div.box__item-title > div.box__price.price .price_original");
+
+    let sellPrice = Number($(original).find("span.text__price-original").text().replaceAll(",", "").replaceAll("원", "").replaceAll("기존가", "").trim());
+
+    if (!sellPrice) {
+        sellPrice = itemPrice;
+    }
+
+    return {
+        itemPrice,
+        sellPrice
+    }
+}
+
+async function getProductHtml(goodsCode) {
+    // 조회
+    let data = await  (await fetch("https://item.gmarket.co.kr/Item?goodscode="+goodsCode, {
+        "headers": {
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "accept-language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+            "priority": "u=0, i",
+            "sec-ch-ua": "\"Chromium\";v=\"128\", \"Not;A=Brand\";v=\"24\", \"Google Chrome\";v=\"128\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"macOS\"",
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "same-origin",
+            "sec-fetch-user": "?1",
+            "upgrade-insecure-requests": "1",
+            "Referrer-Policy": "strict-origin-when-cross-origin"
+        },
+        "body": null,
+        "method": "GET"
+    })).text();
+
+    return cheerio.load(data);
 }
 
 // 단순히 이름과 가격만 있는 진짜 옵션
