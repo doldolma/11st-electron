@@ -150,7 +150,7 @@ export async function getProductInfo(product) {
 
         products.push(productOption);
 
-        sleep(rand());
+        await sleep(rand());
     }
     return products;
 }
