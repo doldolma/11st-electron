@@ -3,6 +3,11 @@ import sleep from "../../../util/sleep";
 
 const cheerio = require('cheerio');
 
+const rand = (min, max) => {
+
+    return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
 export default async function getMinishopProduct(customer, updateStatus) {
 
     updateStatus("진행중");
@@ -13,6 +18,9 @@ export default async function getMinishopProduct(customer, updateStatus) {
     for (let i=1; i < 100; i++) {
         // 상품 목록 URL
         let url = "https://minishop.gmarket.co.kr/" + customer.customerId + "/List?CategoryType=General&SortType=" + customer.sort.code + "&DisplayType=LargeImage&Page=" + i + "&PageSize=100"
+        if (customer.category) {
+            url = "https://minishop.gmarket.co.kr/" + customer.customerId + "/List?CategoryType=General&Category=" + customer.category.categoryNum + "&SortType=" + customer.sort.code + "&DisplayType=LargeImage&Page=" + i + "&PageSize=100"
+        }
 
         let data = await getProductList(url);
 
@@ -39,7 +47,7 @@ export default async function getMinishopProduct(customer, updateStatus) {
             })
         }
 
-        await sleep(1500)
+        await sleep(rand(500, 2000))
     }
 
     let allProducts = [];
@@ -61,10 +69,61 @@ export default async function getMinishopProduct(customer, updateStatus) {
             option.itemUrl = "https://item.gmarket.co.kr/Item?goodscode=" + option.itemNo;
             allProducts.push(option);
         }
+
+        await sleep(rand(2000, 5000))
     }
 
-    console.log("allProducts", allProducts);
     return allProducts;
+}
+
+export async function getCat1(customerId) {
+    let url = "https://minishop.gmarket.co.kr/" + customerId;
+
+    let data = await getProductList(url);
+
+    let $ = cheerio.load(data);
+
+    let cats = $("#ulCategory > li");
+
+    const categories = [];
+
+    for (const cat of cats) {
+        const href = $(cat).find("a").attr("href");
+        const link = new URL(url + href);
+        const categoryNum = link.searchParams.get("Category");
+        const categoryName = $(cat).find("a").text().trim();
+        categories.push({
+            categoryName,
+            categoryNum,
+        });
+    }
+
+    return categories;
+}
+
+export async function getCat2(customerId, cat1Id) {
+    let url = "https://minishop.gmarket.co.kr/" + customerId + "/List?Category="+ cat1Id +"&SortType=None&DisplayType=None";
+
+    let data = await getProductList(url)
+
+    let $ = cheerio.load(data);
+
+    const cats = $("#ms_body > div.category_view > div.category_view_box  li");
+
+    const categories = [];
+
+    for (const cat of cats) {
+        const href = $(cat).find("a").attr("href");
+        const link = new URL("https://minishop.gmarket.co.kr/" + customerId + href);
+        const categoryNum = link.searchParams.get("Category");
+        const categoryName = $(cat).find("a").text().trim();
+        categories.push({
+            categoryName,
+            categoryNum,
+        });
+    }
+
+    return categories;
 }
 
 

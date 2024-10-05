@@ -27,7 +27,6 @@ function preProcess(productInfo) {
     return productInfo.products.map(p => {
         if (!p) return {};
 
-        console.log("p", p);
         return {
             '랭킹': parseNumber(p.rank),
             '카테고리': productInfo.category.name ? productInfo.category.name : p.categoryName,

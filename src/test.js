@@ -1179,8 +1179,6 @@ async function main() {
 
         if (flatCategory.categoryName.includes("빠른장보기")) continue;
 
-        console.log("category ", flatCategory.categoryName)
-
         // 조회
         let data =await  (await fetch("https://www.gmarket.co.kr/n/smiledelivery/category?categoryCode="+flatCategory.categoryNo, {
             "headers": {
@@ -1208,9 +1206,6 @@ async function main() {
         for (const li of listItems) {
             const catLi = $(li);
             if (flatCategory.categoryName.includes(catLi.text())) continue;
-
-
-            console.log("items ", catLi.text());
         }
     }
 }
