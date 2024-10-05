@@ -137,9 +137,16 @@ export async function getProductInfo(product) {
 
     // 가격
     if (!product.itemPrice) {
-        product.itemPrice = Number($("#itemcase_basic > div.box__item-title > div.box__price.price > span:nth-child(3) > strong").text().replaceAll(",", "").replaceAll("원", "").trim());
-    }
+        // 쿠폰가
+        product.itemPrice = Number($("#itemcase_basic > div.box__item-title > div.box__price.price .price_innerwrap-coupon .price_real").text().replaceAll(",", "").replaceAll("원", "").trim());
+        if (!product.itemPrice) {
+            // 쿠폰가 없으면 그냥 가격
+            product.itemPrice = Number($("#itemcase_basic > div.box__item-title > div.box__price.price .price_real").text().replaceAll(",", "").replaceAll("원", "").trim());
+        }
 
+        console.log("price", product.itemPrice)
+
+    }
 
     // 옵션 목록
     let lis = $("#coreFormTop > div > div > div > ul > li");

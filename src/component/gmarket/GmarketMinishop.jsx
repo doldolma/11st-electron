@@ -92,7 +92,7 @@ export default function GmarketMinishop() {
 
     const crawlProduct = async () => {
         for (const customer of customers) {
-            if (Object.keys(completedList).includes(String(customer.customerId))) continue;
+            if (Object.keys(completedList).includes(getCustomerKey(customer))) continue;
 
             await getMinishopProduct(customer, updatePresentStatus(getCustomerKey(customer)))
                 .then(result => {
