@@ -94,7 +94,7 @@ export async function getProductInfo(product) {
 
     // 상품 정보
     product.itemName = $("#itemcase_basic > div.box__item-title > div.box__item-info > h1").text();
-    product.imageUrl = "https" +  $("#container > div.item-topinfowrap > div.thumb-gallery.uxecarousel > div.box__viewer-container > ul > li.on > a > img").first().attr("src");
+    product.imageUrl = "https:" +  $("#container > div.item-topinfowrap > div.thumb-gallery.uxecarousel > div.box__viewer-container > ul > li.on > a > img").first().attr("src");
     // 카테고리
     let categoryLi =  $("body > div.location-navi > ul > li")
 
