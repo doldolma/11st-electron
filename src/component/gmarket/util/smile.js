@@ -18,6 +18,7 @@ export default async function getCategoryProducts(category, updateStatus) {
 
     // 크롤링을 통한 카테고리 상품 목록 가쟈오기
     for (let i=1; i<=5; i++) {
+        sleep(rand());
         let res = await getPage(category.no, category.sort, 1)
 
         const $ = cheerio.load(res)
@@ -45,41 +46,6 @@ export default async function getCategoryProducts(category, updateStatus) {
             }
         }
     }
-
-    // // 카테고리 상품 목록
-    // let url = "https://www.gmarket.co.kr/n/smiledelivery/api/smiledelivery/category?categoryCode=" + category.no + "&s=" + category.sort;
-    // let response = (await axios.get(url));
-    //
-    // if (response.status !== 200) {
-    //     console.log("통신에러");
-    //     return;
-    // }
-    //
-    // let data = response.data;
-    //
-    // let pagination = data.pagination;
-    //
-    // let seachContent = data.searchContent;
-    //
-    // let items = [...seachContent.items];
-
-    // for (let i=2; i<pagination.pageSize; i++) {
-    //     if (i > 4) {
-    //         break;
-    //     }
-    //
-    //     let response = (await axios.get(url + "&page=" + i));
-    //     try {
-    //         let newItems = response.data.searchContent.items;
-    //         for (const newItem of newItems) {
-    //             newItem.rank = ((i - 1) * 60) + newItem.rank;
-    //         }
-    //         items = [...items, ...newItems];
-    //     } catch(e) {
-    //         console.error(e)
-    //         continue;
-    //     }
-    // }
 
     let allProducts = [];
     const totalItems = items.length;
