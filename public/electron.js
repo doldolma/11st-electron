@@ -22,7 +22,7 @@ async function launchBrowser() {
     if (browser) {
         return browser;
     }
-    browser = await chromium.launch({ headless: !isDev });
+    browser = await chromium.launch({ headless: false, args: ["--start-minimized"] });
     return browser;
 }
 
