@@ -1,5 +1,6 @@
 // public/electron.js
 const { app, BrowserWindow, Menu, dialog, ipcMain } = require('electron');
+const { chromium } = require('playwright');
 const path = require("path");
 const { autoUpdater } = require('electron-updater');
 const log = require('electron-log');
@@ -13,6 +14,28 @@ autoUpdater.logger.transports.file.level = 'info';
 
 // 무제한 저장소 플래그 설정
 app.commandLine.appendSwitch('unlimited-storage');
+
+let browser = null;
+let context = null;
+
+async function launchBrowser() {
+    if (browser) {
+        return browser;
+    }
+    browser = await chromium.launch({ headless: !isDev });
+    return browser;
+}
+
+async function getContext() {
+    if (context) {
+        return context;
+    }
+    const browserInstance = await launchBrowser();
+    context = await browserInstance.newContext({
+        javaScriptEnabled: false,
+    });
+    return context;
+}
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -110,6 +133,20 @@ ipcMain.on('check_for_update', () => {
 ipcMain.handle('get-app-version', () => {
     return app.getVersion();
 });
+
+ipcMain.handle("fetch-page-html", async (event, url) => {
+    try {
+        const context = await getContext();
+        const page = await context.newPage();
+        await page.goto(url, { waitUntil: 'domcontentloaded' , timeout: 20000});
+        let html = await page.content();
+        await page.close();
+        return html;
+    } catch (error) {
+        console.error('Error in Playwright handler:', error);
+        throw error;
+    }
+})
 
 // 업데이트 이벤트 처리
 autoUpdater.on('update-available', (info) => {

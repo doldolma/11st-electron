@@ -1,9 +1,10 @@
-import axios from "axios";
 import sleep from "../../../util/sleep";
-const cheerio = require('cheerio');
 
-const min = 500;
-const max = 2000;
+const cheerio = require('cheerio');
+const {ipcRenderer} = window.require('electron');
+
+const min = 2800;
+const max = 5500;
 const rand = () => {
 
     return Math.floor(Math.random() * (max - min + 1)) + min
@@ -11,57 +12,91 @@ const rand = () => {
 
 export default async function getCategoryProducts(category, updateStatus) {
 
-    updateStatus("진행중");
+    updateStatus("상품 목록 로딩중");
 
-    // 카테고리 상품 목록
-    let url = "https://www.gmarket.co.kr/n/smiledelivery/api/smiledelivery/category?categoryCode=" + category.no + "&s=" + category.sort;
-    let response = (await axios.get(url));
+    let items = [];
 
-    if (response.status !== 200) {
-        console.log("통신에러");
-        return;
-    }
+    // 크롤링을 통한 카테고리 상품 목록 가쟈오기
+    for (let i=1; i<=5; i++) {
+        let res = await getPage(category.no, category.sort, 1)
 
-    let data = response.data;
+        const $ = cheerio.load(res)
 
-    let pagination = data.pagination;
+        let liTags = $('ul.normal_item_list li');
 
-    let seachContent = data.searchContent;
+        let rank = 0;
 
-    let items = [...seachContent.items];
+        for (const li of liTags) {
+            rank += 1;
 
-    for (let i=2; i<pagination.pageSize; i++) {
-        if (i > 4) {
-            break;
-        }
+            const $li = $(li);
 
-        let response = (await axios.get(url + "&page=" + i));
-        try {
-            let newItems = response.data.searchContent.items;
-            for (const newItem of newItems) {
-                newItem.rank = ((i - 1) * 60) + newItem.rank;
+            let product = {rank};
+
+            let href = $li.find("a").attr("href");
+            if (!href) continue;
+            const regex = /[?&]goodscode=([^&]+)/;
+            const match = regex.exec(href);
+            if (match) {
+                product.itemNo = match[1];
+                product.itemUrl = href;
+
+                items.push(product);
             }
-            items = [...items, ...newItems];
-        } catch(e) {
-            console.error(e)
-            continue;
         }
     }
+
+    // // 카테고리 상품 목록
+    // let url = "https://www.gmarket.co.kr/n/smiledelivery/api/smiledelivery/category?categoryCode=" + category.no + "&s=" + category.sort;
+    // let response = (await axios.get(url));
+    //
+    // if (response.status !== 200) {
+    //     console.log("통신에러");
+    //     return;
+    // }
+    //
+    // let data = response.data;
+    //
+    // let pagination = data.pagination;
+    //
+    // let seachContent = data.searchContent;
+    //
+    // let items = [...seachContent.items];
+
+    // for (let i=2; i<pagination.pageSize; i++) {
+    //     if (i > 4) {
+    //         break;
+    //     }
+    //
+    //     let response = (await axios.get(url + "&page=" + i));
+    //     try {
+    //         let newItems = response.data.searchContent.items;
+    //         for (const newItem of newItems) {
+    //             newItem.rank = ((i - 1) * 60) + newItem.rank;
+    //         }
+    //         items = [...items, ...newItems];
+    //     } catch(e) {
+    //         console.error(e)
+    //         continue;
+    //     }
+    // }
 
     let allProducts = [];
     const totalItems = items.length;
 
-
     let a = 0;
+    updateStatus("진행중");
+
     for (const item of items) {
-        // 진행률
-        let progress = (++a / totalItems * 100).toFixed(1);
-        updateStatus(`진행중(${progress}%)`);
 
         // 상품 옵션 가져오기 (상품 상세 페이지에서)
         await sleep(rand());
         let options = await getProductInfo(item);
         allProducts = [...allProducts, ...options];
+
+        // 진행률
+        let progress = (++a / totalItems * 100).toFixed(1);
+        updateStatus(`진행중(${progress}%)`);
     }
 
     return allProducts;
@@ -75,9 +110,9 @@ export async function getProductInfo(product) {
 
     // 상품 정보
     product.itemName = $("#itemcase_basic > div.box__item-title > div.box__item-info > h1").text();
-    product.imageUrl = "https:" +  $("#container > div.item-topinfowrap > div.thumb-gallery.uxecarousel > div.box__viewer-container > ul > li.on > a > img").first().attr("src");
+    product.imageUrl = "https:" + $("#container > div.item-topinfowrap > div.thumb-gallery.uxecarousel > div.box__viewer-container > ul > li.on > a > img").first().attr("src");
     // 카테고리
-    let categoryLi =  $("body > div.location-navi > ul > li")
+    let categoryLi = $("body > div.location-navi > ul > li")
 
     let i = 0;
     let categoryName = "";
@@ -102,18 +137,12 @@ export async function getProductInfo(product) {
 
     // 별점
     if (!product.reviewCount) {
-        const span = $("#itemcase_basic > div.box__item-title > div.box__item-info > div.box__rating-information > div > span");
-        const style = span.attr('style');
-        if (style) {
-            const widthMatch = style.match(/width:\s*(\d+(?:\.\d+)?%)/);
-            if (widthMatch) {
-                const width = widthMatch[1];
-                product.reviewPoint = (5 * (parseFloat(width) / 100)).toFixed(1);
-            } else {
-            }
-        }
-        // 별점 갯수
-        product.reviewCount = parseInt($("#itemcase_basic > div.box__item-title > div.box__item-info > div.box__rating-information > span.box__rating-number").text().replaceAll("(", "").replaceAll(")", "").replaceAll(",", "").trim())
+        const span = $("#itemcase_basic > div > div.box__item-info > div.box__score-awards > a > span.text__score");
+
+        product.reviewPoint = parseInt(span.text().replaceAll("점", "").replaceAll("평", "").trim());
+
+        product.reviewCount = parseInt($("#itemcase_basic > div > div.box__item-info > div.box__score-awards > a > span.text__num").text().replaceAll("개", "").replaceAll("리뷰", "").trim());
+        // product.reviewCount = parseInt($("#itemcase_basic > div.box__item-title > div.box__item-info > div.box__rating-information > span.box__rating-number").text().replaceAll("(", "").replaceAll(")", "").replaceAll(",", "").trim())
     }
 
     // 가격
@@ -136,7 +165,7 @@ export async function getProductInfo(product) {
 
         // productOption.itemUrl = optionTag.find('a').attr('href');
         productOption.itemNo = optionTag.find('a').attr('data-goodscode');
-        productOption.itemUrl = "https://item.gmarket.co.kr/Item?goodscode=" +  productOption.itemNo;
+        productOption.itemUrl = "https://item.gmarket.co.kr/Item?goodscode=" + productOption.itemNo;
         // productOption.imageUrl = "https:" + optionTag.find('div.thumb img').attr('src');
         productOption.imageUrl = "https://gdimg.gmarket.co.kr/" + productOption.itemNo + "/still/1200"
         productOption.itemName = optionTag.find('span.item_tit').text();
@@ -152,7 +181,15 @@ export async function getProductInfo(product) {
 
         await sleep(rand());
     }
+
+    console.log("products", products)
+
     return products;
+}
+
+async function getPage(categoryNo, sort, pageNumber) {
+
+    return await ipcRenderer.invoke("fetch-page-html", "https://www.gmarket.co.kr/n/smiledelivery/category?categoryCode=" + categoryNo + "&s=" + sort + "&p=" + pageNumber);
 }
 
 function getPrice($) {
@@ -179,27 +216,31 @@ function getPrice($) {
 }
 
 async function getProductHtml(goodsCode) {
-    // 조회
-    let data = await  (await fetch("https://item.gmarket.co.kr/Item?goodscode="+goodsCode, {
-        "headers": {
-            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-            "accept-language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
-            "priority": "u=0, i",
-            "sec-ch-ua": "\"Chromium\";v=\"128\", \"Not;A=Brand\";v=\"24\", \"Google Chrome\";v=\"128\"",
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": "\"macOS\"",
-            "sec-fetch-dest": "document",
-            "sec-fetch-mode": "navigate",
-            "sec-fetch-site": "same-origin",
-            "sec-fetch-user": "?1",
-            "upgrade-insecure-requests": "1",
-            "Referrer-Policy": "strict-origin-when-cross-origin"
-        },
-        "body": null,
-        "method": "GET"
-    })).text();
+    // // 조회
+    // let data = await  (await fetch("https://item.gmarket.co.kr/Item?goodscode="+goodsCode, {
+    //     "headers": {
+    //         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    //         "accept-language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+    //         "priority": "u=0, i",
+    //         "sec-ch-ua": "\"Chromium\";v=\"128\", \"Not;A=Brand\";v=\"24\", \"Google Chrome\";v=\"128\"",
+    //         "sec-ch-ua-mobile": "?0",
+    //         "sec-ch-ua-platform": "\"macOS\"",
+    //         "sec-fetch-dest": "document",
+    //         "sec-fetch-mode": "navigate",
+    //         "sec-fetch-site": "same-origin",
+    //         "sec-fetch-user": "?1",
+    //         "upgrade-insecure-requests": "1",
+    //         "Referrer-Policy": "strict-origin-when-cross-origin"
+    //     },
+    //     "body": null,
+    //     "method": "GET"
+    // })).text();
+    //
+    // return cheerio.load(data);
 
-    return cheerio.load(data);
+    return ipcRenderer.invoke("fetch-page-html", "https://item.gmarket.co.kr/Item?goodscode=" + goodsCode).then(html => {
+        return cheerio.load(html);
+    });
 }
 
 // 단순히 이름과 가격만 있는 진짜 옵션
