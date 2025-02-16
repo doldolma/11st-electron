@@ -34,7 +34,7 @@
     "start": "concurrently \"cross-env NODE_ENV=development BROWSER=none npm run react-start\" \"wait-on http://127.0.0.1:3000 && cross-env NODE_ENV=development electron . --enable-logging\"",
     "build": "npm run react-build && cross-env NODE_ENV=production electron-builder",
     "build:win": "cross-env PLAYWRIGHT_BROWSERS_PATH=./ms-playwright npx playwright install chromium && npm run react-build && cross-env NODE_ENV=production electron-builder --win --x64 && npm run postbuild",
-    "deploy": "npm run react-build &&  electron-builder --win --x64 --publish always",
+    "deploy": "cross-env PLAYWRIGHT_BROWSERS_PATH=./ms-playwright npx playwright install chromium && npm run react-build &&  electron-builder --win --x64 --publish always && npm run postbuild",
     "postbuild": "rimraf ms-playwright"
   },
   "eslintConfig": {
