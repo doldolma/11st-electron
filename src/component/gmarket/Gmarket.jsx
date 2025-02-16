@@ -1,8 +1,9 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {useRecoilState} from "recoil";
 import product from "../../atoms/product";
 import defaultCategory from "./util/smile_categories";
 import getCategoryProducts from "./util/smile";
+import StopCircleIcon from '@mui/icons-material/StopCircle';
 import {
     Autocomplete,
     Button,
@@ -45,6 +46,12 @@ const defaultPresentLoad = {
 const pageMin = 1;
 const pageMax = 10;
 
+function createCancelToken() {
+    return {
+        cancelled: false,
+    }
+}
+
 export default function Gmarket() {
     // 카테고리 목록
     const [categories, setCategories] = useState([]);
@@ -60,6 +67,9 @@ export default function Gmarket() {
 
     // 크롤링 진행 중 여부
     const [loading, setLoading] = useState(false);
+
+    // 중지 여부 전송 토큰
+    const cancelTokenRef = useRef(null);
 
     // 스캔 완료된 목록
     const [completedList, setCompletedList] = useRecoilState(product);
@@ -89,11 +99,15 @@ export default function Gmarket() {
         });
     }
 
-    const crawlProduct = async () => {
+    const crawlProduct = async (isStop) => {
         for (const category of categories) {
             if (Object.keys(completedList).includes(String(category.no))) continue;
 
-            await getCategoryProducts(category, updatePresentStatus(category.no))
+            if (isStop.cancelled) {
+                break;
+            }
+
+            await getCategoryProducts(category, updatePresentStatus(category.no), isStop)
                 .then(result => {
                     if (result) {
                         setCompletedList(c => ({
@@ -121,7 +135,7 @@ export default function Gmarket() {
     return (
         <>
             <h1 style={{textAlign: 'center'}}>
-                지마켓 스마일배송  상품을 스캔합니다
+                지마켓 스마일배송 상품을 스캔합니다
             </h1>
             <h3 style={{textAlign: 'center'}}>
                 스캔할 카테고리를 선택하고 재생 버튼을 누르면 상품 목록을 스캔합니다.
@@ -161,7 +175,7 @@ export default function Gmarket() {
                     <Divider/>
                     {categories.map((category, i) => {
                         return (
-                            <ListItem sx={{width: '100%'}} key={i+category.no}>
+                            <ListItem sx={{width: '100%'}} key={i + category.no}>
                                 <Grid container spacing={2} sx={{width: '100%'}}>
                                     <Grid size={1}>
                                         <Item>{category.no}</Item>
@@ -186,7 +200,7 @@ export default function Gmarket() {
                                         <Item>
                                             {
                                                 presentLoad.categoryNo === category.no ? presentLoad.load : (
-                                                    Object.keys(completedList).includes(String(category.no)) ? '완료됨' : '대기중'
+                                                    Object.keys(completedList).includes(String(category.no + "_" + category.sort)) ? '완료됨' : '대기중'
                                                 )
                                             }
                                         </Item>
@@ -219,7 +233,7 @@ export default function Gmarket() {
                                         });
                                     }}
                                     renderInput={(params) => (
-                                        <TextField {...params} label="카테고리" variant="standard" />
+                                        <TextField {...params} label="카테고리" variant="standard"/>
                                     )}
                                 />
                                 <TextField select label="정렬" variant="filled" value={newCategory.sort} onChange={e => {
@@ -236,7 +250,8 @@ export default function Gmarket() {
                                         })
                                     }
                                 </TextField>
-                                <TextField label="수집 시작페이지" type="number" variant="standard" value={newCategory.startPage} onChange={e => {
+                                <TextField label="수집 시작페이지" type="number" variant="standard"
+                                           value={newCategory.startPage} onChange={e => {
                                     let startPage = Number(e.target.value);
                                     if (startPage < pageMin) startPage = pageMin;
                                     if (startPage > pageMax) startPage = pageMax;
@@ -246,17 +261,18 @@ export default function Gmarket() {
                                     });
                                 }}
                                 ></TextField>
-                                <TextField label="수집 종료페이지" type="number" variant="standard" value={newCategory.endPage} onChange={e => {
-                                    let endPage = Number(e.target.value);
-                                    if (endPage < pageMin) endPage = pageMin;
-                                    if (endPage > pageMax) endPage = pageMax;
-                                    setNewCategory({
-                                        ...newCategory,
-                                        endPage: endPage
-                                    })
-                                }}></TextField>
+                                <TextField label="수집 종료페이지" type="number" variant="standard" value={newCategory.endPage}
+                                           onChange={e => {
+                                               let endPage = Number(e.target.value);
+                                               if (endPage < pageMin) endPage = pageMin;
+                                               if (endPage > pageMax) endPage = pageMax;
+                                               setNewCategory({
+                                                   ...newCategory,
+                                                   endPage: endPage
+                                               })
+                                           }}></TextField>
                             </FormControl>
-                            <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+                            <div style={{textAlign: 'center', marginTop: '0.5rem'}}>
                                 <Button variant="contained" onClick={() => {
                                     if (!newCategory || !newCategory.no || !newCategory.sort || !newCategory.startPage || !newCategory.endPage) {
                                         return;
@@ -284,14 +300,24 @@ export default function Gmarket() {
                                             setAddFlag(false);
                                         }}>취소</Button>
                             </div>
-                        </> : (loading ? '' : <Button variant="contained" sx={{ mt: '1rem' }} onClick={() => setAddFlag(true)}>카테고리 추가
-                        </Button>)
+                        </> : (loading ? '' :
+                            <Button variant="contained" sx={{mt: '1rem'}} onClick={() => setAddFlag(true)}>카테고리 추가
+                            </Button>)
                     }
                 </div>
             </Stack>
             <div style={fixedButton}>
                 {
-                    loading ? <HourglassTopIcon style={{fontSize: '5rem'}}/> :
+                    loading ? <StopCircleIcon style={{fontSize: '5rem'}} onClick={() => {
+                            if (!loading) return;
+                            if (!window.confirm("작업을 중지할까요?")) {
+                                return;
+                            }
+
+                            if (cancelTokenRef.current) {
+                                cancelTokenRef.current.cancelled = true;
+                            }
+                        }}/> :
                         <PlayArrowIcon style={{fontSize: '5rem'}} onClick={() => {
                             if (loading) return;
 
@@ -299,9 +325,10 @@ export default function Gmarket() {
                                 return;
                             }
 
+                            cancelTokenRef.current = createCancelToken();
                             setLoading(true);
 
-                            crawlProduct().then(() => setLoading(false))
+                            crawlProduct(cancelTokenRef.current).then(() => setLoading(false))
                         }}/>
                 }
             </div>

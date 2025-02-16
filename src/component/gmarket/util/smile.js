@@ -10,7 +10,7 @@ const rand = () => {
     return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
-export default async function getCategoryProducts(category, updateStatus) {
+export default async function getCategoryProducts(category, updateStatus, isStop) {
 
     updateStatus("상품 목록 로딩중");
 
@@ -45,6 +45,10 @@ export default async function getCategoryProducts(category, updateStatus) {
                 items.push(product);
             }
         }
+
+        if (isStop.cancelled) {
+            break;
+        }
     }
 
     let allProducts = [];
@@ -54,10 +58,13 @@ export default async function getCategoryProducts(category, updateStatus) {
     updateStatus("진행중");
 
     for (const item of items) {
+        if (isStop.cancelled) {
+            break;
+        }
 
         // 상품 옵션 가져오기 (상품 상세 페이지에서)
         await sleep(rand());
-        let options = await getProductInfo(item);
+        let options = await getProductInfo(item, isStop);
         allProducts = [...allProducts, ...options];
 
         // 진행률
@@ -70,7 +77,7 @@ export default async function getCategoryProducts(category, updateStatus) {
 
 
 // 상세 페이지
-export async function getProductInfo(product) {
+export async function getProductInfo(product, isStop) {
 
     let $ = await getProductHtml(product.itemNo);
 
@@ -126,6 +133,8 @@ export async function getProductInfo(product) {
     const products = [];
 
     for (const li of lis) {
+        if (isStop.cancelled) break;
+
         let optionTag = $(li);
         let productOption = {...product};
 
