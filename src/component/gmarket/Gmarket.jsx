@@ -34,11 +34,16 @@ const emptyCategory = {
     no: '',
     name: '',
     sort: '8',
+    startPage: 1,
+    endPage: 5,
 }
 
 const defaultPresentLoad = {
     categoryNo: -1,
 }
+
+const pageMin = 1;
+const pageMax = 10;
 
 export default function Gmarket() {
     // 카테고리 목록
@@ -93,7 +98,7 @@ export default function Gmarket() {
                     if (result) {
                         setCompletedList(c => ({
                             ...c,
-                            [category.no]: {
+                            [category.no + "_" + category.sort]: {
                                 market: 'gmarket',
                                 category: category,
                                 date: Date.now(),
@@ -130,14 +135,20 @@ export default function Gmarket() {
                 <List sx={list} component="nav">
                     <ListItem sx={{width: '100%'}}>
                         <Grid container spacing={2} sx={{width: '100%'}}>
-                            <Grid size={2}>
+                            <Grid size={1}>
                                 <Item><h3>번호</h3></Item>
                             </Grid>
                             <Grid size={4}>
                                 <Item><h3>카테고리</h3></Item>
                             </Grid>
-                            <Grid size={2}>
+                            <Grid size={1}>
                                 <Item><h3>정렬</h3></Item>
+                            </Grid>
+                            <Grid size={1}>
+                                <Item><h3>시작페이지</h3></Item>
+                            </Grid>
+                            <Grid size={1}>
+                                <Item><h3>종료페이지</h3></Item>
                             </Grid>
                             <Grid size={2}>
                                 <Item><h3>상태</h3></Item>
@@ -152,14 +163,24 @@ export default function Gmarket() {
                         return (
                             <ListItem sx={{width: '100%'}} key={i+category.no}>
                                 <Grid container spacing={2} sx={{width: '100%'}}>
-                                    <Grid size={2}>
+                                    <Grid size={1}>
                                         <Item>{category.no}</Item>
                                     </Grid>
                                     <Grid size={4}>
                                         <Item>{category.name}</Item>
                                     </Grid>
-                                    <Grid size={2}>
+                                    <Grid size={1}>
                                         <Item>{sorted.find(s => s.val === category.sort).name}</Item>
+                                    </Grid>
+                                    <Grid size={1}>
+                                        <Item>
+                                            {category.startPage}
+                                        </Item>
+                                    </Grid>
+                                    <Grid size={1}>
+                                        <Item>
+                                            {category.endPage}
+                                        </Item>
                                     </Grid>
                                     <Grid size={2}>
                                         <Item>
@@ -215,18 +236,37 @@ export default function Gmarket() {
                                         })
                                     }
                                 </TextField>
+                                <TextField label="수집 시작페이지" type="number" variant="standard" value={newCategory.startPage} onChange={e => {
+                                    let startPage = Number(e.target.value);
+                                    if (startPage < pageMin) startPage = pageMin;
+                                    if (startPage > pageMax) startPage = pageMax;
+                                    setNewCategory({
+                                        ...newCategory,
+                                        startPage: startPage
+                                    });
+                                }}
+                                ></TextField>
+                                <TextField label="수집 종료페이지" type="number" variant="standard" value={newCategory.endPage} onChange={e => {
+                                    let endPage = Number(e.target.value);
+                                    if (endPage < pageMin) endPage = pageMin;
+                                    if (endPage > pageMax) endPage = pageMax;
+                                    setNewCategory({
+                                        ...newCategory,
+                                        endPage: endPage
+                                    })
+                                }}></TextField>
                             </FormControl>
                             <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
                                 <Button variant="contained" onClick={() => {
-                                    if (!newCategory || !newCategory.no || !newCategory.sort) {
+                                    if (!newCategory || !newCategory.no || !newCategory.sort || !newCategory.startPage || !newCategory.endPage) {
                                         return;
                                     }
-                                    if (Object.keys(completedList).includes(newCategory.no)) {
+                                    if (Object.keys(completedList).includes(newCategory.no + "_" + newCategory.sort)) {
                                         alert('이미 완료된 카테고리입니다');
                                         return;
                                     }
 
-                                    if (categories.find(category => category.no === newCategory.no)) {
+                                    if (categories.find(category => (category.no + "_" + category.sort) === (newCategory.no + "_" + newCategory.sort))) {
                                         alert('이미 추가된 카테고리입니다');
                                         return;
                                     }
