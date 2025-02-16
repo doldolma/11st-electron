@@ -1,6 +1,5 @@
 // public/electron.js
 const { app, BrowserWindow, Menu, dialog, ipcMain } = require('electron');
-const { chromium } = require('playwright');
 const path = require("path");
 const { autoUpdater } = require('electron-updater');
 const log = require('electron-log');
@@ -11,6 +10,13 @@ let mainWindow;
 
 autoUpdater.logger = log;
 autoUpdater.logger.transports.file.level = 'info';
+
+if (!isDev) {
+    // Electron 앱이 패키징되어 실행될 때, extraResources는 process.resourcesPath에 위치합니다.
+    process.env.PLAYWRIGHT_BROWSERS_PATH = path.join(process.resourcesPath, 'ms-playwright');
+}
+
+const { chromium } = require('playwright');
 
 // 무제한 저장소 플래그 설정
 app.commandLine.appendSwitch('unlimited-storage');
@@ -80,7 +86,7 @@ function createWindow() {
         {
             label: 'File',
             submenu: [
-                { role: 'quit' }
+                {role: 'quit'}
             ]
         },
         {
@@ -138,7 +144,7 @@ ipcMain.handle("fetch-page-html", async (event, url) => {
     try {
         const context = await getContext();
         const page = await context.newPage();
-        await page.goto(url, { waitUntil: 'domcontentloaded' , timeout: 20000});
+        await page.goto(url, {waitUntil: 'domcontentloaded', timeout: 20000});
         let html = await page.content();
         await page.close();
         return html;

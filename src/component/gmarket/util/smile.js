@@ -18,7 +18,7 @@ export default async function getCategoryProducts(category, updateStatus) {
 
     // 크롤링을 통한 카테고리 상품 목록 가쟈오기
     for (let i=1; i<=5; i++) {
-        sleep(rand());
+        await sleep(rand());
         let res = await getPage(category.no, category.sort, 1)
 
         const $ = cheerio.load(res)
