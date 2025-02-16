@@ -105,7 +105,7 @@ export async function getProductInfo(product) {
     if (!product.reviewCount) {
         const span = $("#itemcase_basic > div > div.box__item-info > div.box__score-awards > a > span.text__score");
 
-        product.reviewPoint = parseInt(span.text().replaceAll("점", "").replaceAll("평", "").trim());
+        product.reviewPoint = parseFloat(span.text().replaceAll("점", "").replaceAll("평", "").trim());
 
         product.reviewCount = parseInt($("#itemcase_basic > div > div.box__item-info > div.box__score-awards > a > span.text__num").text().replaceAll("개", "").replaceAll("리뷰", "").trim());
         // product.reviewCount = parseInt($("#itemcase_basic > div.box__item-title > div.box__item-info > div.box__rating-information > span.box__rating-number").text().replaceAll("(", "").replaceAll(")", "").replaceAll(",", "").trim())
